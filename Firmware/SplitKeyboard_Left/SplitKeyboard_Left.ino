@@ -1,10 +1,6 @@
-#include "HID-Project.h"
+
+#include "KeyMapping.h"
 #include <Encoder.h>
-
- 
-
- 
-
 
 typedef enum{
 BUTTON_R1_C1   =0 ,
@@ -28,15 +24,7 @@ LAYER_SHIFT_STICKY = 0,
 LAYER_SHIFT_TOGGLE = 1
 }enLayerShiftMode;
 
-#define KEYBORD_ROWS_COUNT 3
-#define KEYBORD_COLS_COUNT 6
 
-#define BUTTONS_DEBUNCE_TIME 30
-#define MAIN_LOOP_CYCLIC_TIME_MS  1
-#define KEY_HOLD_UPDATE_PERIOD_MS 40
-#define BUTTON_HOLD_DEBUNCE_TIME 500
-
-#define LAYER_SHIFT_TOGGLE_ENABLED LAYER_SHIFT_TOGGLE
 
 
 
@@ -71,6 +59,14 @@ typedef struct{
   bool isDebunceInProgress;
 }strButtonStatus;
  
+//  typedef struct{
+//   KeyboardKeycode Keycode; 
+//   bool isShifted;
+// }strKeyCode;
+
+// typedef struct{
+//   strKeyCode LayerMap[3]; 
+// }strKeyMapping;
 
 strButtonStatus keyMatrixButtonsStatus[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT]; 
 strButtonStatus sumbButtonsStatus[3] = {{RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false},
@@ -83,148 +79,70 @@ strButtonStatus sumbButtonsStatus_R[3] = {{RELEASED, RELEASED, RELEASED, RELEASE
                                      {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false}};
 
 
-
-
-
-// strKeyMaping keyMapingLeft[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] =   {  
+// strKeyMapping keyMapingLeft[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] =   {  
 //   {
-//         {{{KEY_TAB,false}, {KEY_TAB,false}, {KEY_TAB,false}}},
-//         {{{KEY_Q,false}, {KEY_F1,false}, {KEY_1,true}}},
-//         {{{KEY_W,false}, {KEY_F2,false}, {KEY_2,true}}},
-//         {{{KEY_E,false}, {KEY_F3,false}, {KEY_3,true}}},
-//         {{{KEY_R,false}, {KEY_F4,false}, {KEY_4,true}}},
-//         {{{KEY_T,false}, {KEY_F5,false}, {KEY_SLASH,true}}},
+//         {{{KEY_ESC,false}, {KEY_TAB,false}, {KEY_TILDE,false}}},
+//         {{{KEY_Q,false}, {KEY_1,true}, {KEY_F1,false}}},
+//         {{{KEY_W,false}, {KEY_2,true}, {KEY_F2,false}}},
+//         {{{KEY_E,false}, {KEY_3,true}, {KEY_F3,false}}},
+//         {{{KEY_R,false}, {KEY_4,true}, {KEY_F4,false}}},
+//         {{{KEY_T,false}, {KEY_5,true}, {KEY_F5,false}}},
 //   },
 //   {
-//         {{{KEY_CAPS_LOCK,false}, {KEY_CAPS_LOCK,false}, {KEY_CAPS_LOCK,false}}},
-//         {{{KEY_A,false}, {KEY_F6,false}, {KEY_A,false}}},
-//         {{{KEY_S,false}, {KEY_F7,false}, {KEY_S,false}}},
-//         {{{KEY_D,false}, {KEY_F8,false}, {KEY_D,false}}},
-//         {{{KEY_F,false}, {KEY_F9,false}, {KEY_F,false}}},
-//         {{{KEY_G,false}, {KEY_F10,false}, {KEY_G,false}}},
+//         {{{KEY_LEFT_SHIFT,false}, {KEY_LEFT_SHIFT,false}, {KEY_CAPS_LOCK,false}}},
+//         {{{KEY_A,false}, {KEY_A,false}, {KEY_F6,false}}},
+//         {{{KEY_S,false}, {KEY_S,false}, {KEY_F7,false}}},
+//         {{{KEY_D,false}, {KEY_D,false}, {KEY_F8,false}}},
+//         {{{KEY_F,false}, {KEY_F,false}, {KEY_F9,false}}},
+//         {{{KEY_G,false}, {KEY_G,false}, {KEY_F10,false}}},
 //   },
 //   {
-//         {{{KEY_LEFT_SHIFT,false}, {KEY_LEFT_SHIFT,false}, {KEY_LEFT_SHIFT,false}}},
-//         {{{KEY_Z,false}, {KEY_Z,false}, {KEY_Z,false}}},
-//         {{{KEY_X,false}, {KEY_F11,false}, {KEY_X,false}}},
-//         {{{KEY_C,false}, {KEY_F12,false}, {KEY_C,false}}},
+//         {{{KEY_LEFT_WINDOWS,false}, {KEY_LEFT_WINDOWS,false}, {KEY_LEFT_ALT,false}}},
+//         {{{KEY_Z,false}, {KEY_Z,false}, {KEY_F11,false}}},
+//         {{{KEY_X,false}, {KEY_X,false}, {KEY_F12,false}}},
+//         {{{KEY_C,false}, {KEY_C,false}, {KEY_C,false}}},
 //         {{{KEY_V,false}, {KEY_V,false}, {KEY_V,false}}},
 //         {{{KEY_B,false}, {KEY_B,false}, {KEY_B,false}}},
 //   }
 // };
-// strKeyMaping keyMapingRight[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] =   {  
+// strKeyMapping keyMapingRight[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] =   {  
 //   {
-//         {{{KEY_Y,false}, {KEY_LEFT_BRACE,true}, {KEY_6,true}}},
-//         {{{KEY_U,false}, {KEY_RIGHT_BRACE,true}, {KEYPAD_7,false}}},
-//         {{{KEY_I,false}, {KEY_9,true}, {KEYPAD_8,false}}},
-//         {{{KEY_O,false}, {KEY_0,true}, {KEYPAD_9,false}}},
-//         {{{KEY_P,false}, {KEY_BACKSLASH,false}, {KEYPAD_SUBTRACT,false}}},
-//         {{{KEY_BACKSPACE,false}, {KEY_BACKSPACE,false}, {KEY_BACKSPACE,false}}},
+//         {{{KEY_Y,false}, {KEY_6,true}, {KEY_6,true}}},
+//         {{{KEY_U,false}, {KEY_7,true}, {KEYPAD_7,false}}},
+//         {{{KEY_I,false}, {KEY_8,true}, {KEYPAD_8,false}}},
+//         {{{KEY_O,false}, {KEY_9,true}, {KEYPAD_9,false}}},
+//         {{{KEY_P,false}, {KEY_0,true}, {KEYPAD_SUBTRACT,false}}},
+//         {{{KEY_BACKSPACE,false}, {KEY_DELETE,false}, {KEY_BACKSPACE,false}}},
 //   },
 //   {
-//         {{{KEY_H,false}, {KEY_COMMA,true}, {KEY_TILDE,true}}},
-//         {{{KEY_J,false}, {KEY_PERIOD,true}, {KEYPAD_4,false}}},
+//         {{{KEY_H,false}, {KEY_H,false}, {KEY_H,false}}},
+//         {{{KEY_J,false}, {KEY_MINUS,false}, {KEYPAD_4,false}}},
 //         {{{KEY_K,false}, {KEY_UP_ARROW,false}, {KEYPAD_5,false}}},
-//         {{{KEY_L,false}, {KEY_SEMICOLON,true}, {KEYPAD_6,false}}},
-//         {{{KEY_SEMICOLON,false}, {KEY_BACKSLASH,true}, {KEYPAD_ADD,false}}},
-//         {{{KEY_HOME,false}, {KEY_LEFT_BRACE,false}, {KEYPAD_MULTIPLY,false}}},
+//         {{{KEY_L,false}, {KEY_LEFT_BRACE,false}, {KEYPAD_6,false}}},
+//         {{{KEY_SEMICOLON,false}, {KEY_RIGHT_BRACE,false}, {KEYPAD_ADD,false}}},
+//         {{{KEY_HOME,false}, {KEY_HOME,false}, {KEYPAD_MULTIPLY,false}}},
 //   },
 //   {
-//         {{{KEY_N,false}, {KEY_SLASH,false}, {KEY_5,true}}},
+//         {{{KEY_N,false}, {KEY_N,false}, {KEY_5,true}}},
 //         {{{KEY_M,false}, {KEY_LEFT_ARROW,false}, {KEYPAD_1,false}}},
 //         {{{KEY_COMMA,false}, {KEY_DOWN_ARROW,false}, {KEYPAD_2,false}}},
 //         {{{KEY_PERIOD,false}, {KEY_RIGHT_ARROW,false}, {KEYPAD_3,false}}},
-//         {{{KEY_QUOTE,true}, {KEY_7,true}, {KEY_EQUAL,false}}},
-//         {{{KEY_END,false}, {KEY_RIGHT_BRACE,false}, {KEYPAD_DIVIDE,false}}},
+//         {{{KEY_QUOTE,false}, {KEY_SLASH,false}, {KEY_EQUAL,false}}},
+//         {{{KEY_END,false}, {KEY_END,false}, {KEYPAD_DIVIDE,false}}},
 //   },
 // };
   
-// strKeyMaping sumbMapingLeft[3] =   {  
-//   {{{KEY_LEFT_WINDOWS,false}, {KEY_LEFT_WINDOWS,false}, {KEY_LEFT_WINDOWS,true}}},
-//   {{{KEY_LANG1,false}, {KEY_LANG1,false}, {KEY_LANG1,true}}},
-//   {{{KEY_SPACE,false}, {KEY_SPACE,false}, {KEY_SPACE,true}}},
+// strKeyMapping sumbMapingLeft[3] =   {  
+//   {{{KEY_LEFT_CTRL,false}, {KEY_LEFT_CTRL,false}, {KEY_LEFT_CTRL,false}}},
+//   {{{KEY_LANG1,false}, {KEY_LANG1,false}, {KEY_LANG1,false}}},
+//   {{{KEY_SPACE,false}, {KEY_SPACE,false}, {KEY_SPACE,false}}},
 // };
 
-// strKeyMaping sumbMapingRight[3] =   {  
-//   {{{KEY_RETURN,false}, {KEY_RETURN,false}, {KEY_RETURN,true}}},
-//   {{{KEY_LANG2,false}, {KEY_LANG2,false}, {KEY_LANG2,true}}},
-//   {{{KEY_LEFT_CTRL,false}, {KEY_LEFT_CTRL,false}, {KEY_LEFT_CTRL,true}}},
+// strKeyMapping sumbMapingRight[3] =   {  
+//   {{{KEY_RETURN,false}, {KEY_RETURN,false}, {KEY_RETURN,false}}},
+//   {{{KEY_LANG2,false}, {KEY_LANG2,false}, {KEY_LANG2,false}}},
+//   {{{KEY_BACKSPACE,false}, {KEY_BACKSPACE,false}, {KEYPAD_0,false}}},
 // };
-
-
-
-typedef struct{
-  KeyboardKeycode Keycode; 
-  bool isShifted;
-}strKeyCode;
-
-typedef struct{
-  strKeyCode LayerMap[3]; 
-}strKeyMaping;
-strKeyMaping keyMapingLeft[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] =   {  
-  {
-        {{{KEY_ESC,false}, {KEY_TAB,false}, {KEY_TILDE,false}}},
-        {{{KEY_Q,false}, {KEY_1,true}, {KEY_F1,false}}},
-        {{{KEY_W,false}, {KEY_2,true}, {KEY_F2,false}}},
-        {{{KEY_E,false}, {KEY_3,true}, {KEY_F3,false}}},
-        {{{KEY_R,false}, {KEY_4,true}, {KEY_F4,false}}},
-        {{{KEY_T,false}, {KEY_5,true}, {KEY_F5,false}}},
-  },
-  {
-        {{{KEY_LEFT_SHIFT,false}, {KEY_LEFT_SHIFT,false}, {KEY_CAPS_LOCK,false}}},
-        {{{KEY_A,false}, {KEY_A,false}, {KEY_F6,false}}},
-        {{{KEY_S,false}, {KEY_S,false}, {KEY_F7,false}}},
-        {{{KEY_D,false}, {KEY_D,false}, {KEY_F8,false}}},
-        {{{KEY_F,false}, {KEY_F,false}, {KEY_F9,false}}},
-        {{{KEY_G,false}, {KEY_G,false}, {KEY_F10,false}}},
-  },
-  {
-        {{{KEY_LEFT_CTRL,false}, {KEY_LEFT_CTRL,false}, {KEY_LEFT_CTRL,false}}},
-        {{{KEY_Z,false}, {KEY_Z,false}, {KEY_F11,false}}},
-        {{{KEY_X,false}, {KEY_X,false}, {KEY_F12,false}}},
-        {{{KEY_C,false}, {KEY_C,false}, {KEY_C,false}}},
-        {{{KEY_V,false}, {KEY_V,false}, {KEY_V,false}}},
-        {{{KEY_B,false}, {KEY_B,false}, {KEY_B,false}}},
-  }
-};
-strKeyMaping keyMapingRight[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] =   {  
-  {
-        {{{KEY_Y,false}, {KEY_6,true}, {KEY_6,true}}},
-        {{{KEY_U,false}, {KEY_7,true}, {KEYPAD_7,false}}},
-        {{{KEY_I,false}, {KEY_8,true}, {KEYPAD_8,false}}},
-        {{{KEY_O,false}, {KEY_9,true}, {KEYPAD_9,false}}},
-        {{{KEY_P,false}, {KEY_0,true}, {KEYPAD_SUBTRACT,false}}},
-        {{{KEY_BACKSPACE,false}, {KEY_DELETE,false}, {KEY_BACKSPACE,false}}},
-  },
-  {
-        {{{KEY_H,false}, {KEY_H,false}, {KEY_H,false}}},
-        {{{KEY_J,false}, {KEY_MINUS,false}, {KEYPAD_4,false}}},
-        {{{KEY_K,false}, {KEY_UP_ARROW,false}, {KEYPAD_5,false}}},
-        {{{KEY_L,false}, {KEY_LEFT_BRACE,false}, {KEYPAD_6,false}}},
-        {{{KEY_SEMICOLON,false}, {KEY_RIGHT_BRACE,false}, {KEYPAD_ADD,false}}},
-        {{{KEY_HOME,false}, {KEY_HOME,false}, {KEYPAD_MULTIPLY,false}}},
-  },
-  {
-        {{{KEY_N,false}, {KEY_N,false}, {KEY_5,true}}},
-        {{{KEY_M,false}, {KEY_LEFT_ARROW,false}, {KEYPAD_1,false}}},
-        {{{KEY_COMMA,false}, {KEY_DOWN_ARROW,false}, {KEYPAD_2,false}}},
-        {{{KEY_PERIOD,false}, {KEY_RIGHT_ARROW,false}, {KEYPAD_3,false}}},
-        {{{KEY_QUOTE,false}, {KEY_SLASH,false}, {KEY_EQUAL,false}}},
-        {{{KEY_END,false}, {KEY_END,false}, {KEYPAD_DIVIDE,false}}},
-  },
-};
-  
-strKeyMaping sumbMapingLeft[3] =   {  
-  {{{KEY_LEFT_WINDOWS,false}, {KEY_LEFT_WINDOWS,false}, {KEY_LEFT_ALT,false}}},
-  {{{KEY_LANG1,false}, {KEY_LANG1,false}, {KEY_LANG1,false}}},
-  {{{KEY_SPACE,false}, {KEY_SPACE,false}, {KEY_SPACE,false}}},
-};
-
-strKeyMaping sumbMapingRight[3] =   {  
-  {{{KEY_RETURN,false}, {KEY_RETURN,false}, {KEY_RETURN,false}}},
-  {{{KEY_LANG2,false}, {KEY_LANG2,false}, {KEY_LANG2,false}}},
-  {{{KEY_LEFT_CTRL,false}, {KEY_LEFT_SHIFT,false}, {KEYPAD_0,false}}},
-};
 
 void setup() {
   // put your setup code here, to run once:
@@ -303,10 +221,10 @@ void loop() {
   }
   GetRightKeyboardButtonsStatus();
   
-  SumbButtonsMapingHandler(sumbButtonsStatus, sumbMapingLeft);
-  SumbButtonsMapingHandler(sumbButtonsStatus_R, sumbMapingRight);
-  KeyboardMatrixMapingHandler(keyMatrixButtonsStatus, keyMapingLeft);
-  KeyboardMatrixMapingHandler(keyMatrixButtonsStatus_R, keyMapingRight);
+  SumbButtonsMapingHandler(sumbButtonsStatus, thumbMapingLeftPress, thumbMapingLeftPress);
+  SumbButtonsMapingHandler(sumbButtonsStatus_R, thumbMapingRightPress, thumbMapingRightPress);
+  KeyboardMatrixMapingHandler(keyMatrixButtonsStatus, keyMapingLeftPress, keyMapingLeftPress);
+  KeyboardMatrixMapingHandler(keyMatrixButtonsStatus_R, keyMapingRightPress, keyMapingRightPress);
 
 
   if( currentLayer == 2)
@@ -434,32 +352,32 @@ void GetRightKeyboardButtonsStatus(void)
 }
 
 
-void KeyboardMatrixMapingHandler(strButtonStatus buttonStatus[][6], strKeyMaping KeyMaping[][6])
+void KeyboardMatrixMapingHandler(strButtonStatus buttonStatus[][6], strKeyMapping KeyMapingPress[][6], strKeyMapping KeyMapingHold[][6])
 {
   for (int row = 0; row < KEYBORD_ROWS_COUNT; row++) 
   {
     for (int col = 0; col < KEYBORD_COLS_COUNT; col++) 
     {
-      KeyPressHandler(&buttonStatus[row][col], &KeyMaping[row][col]);
+      KeyPressHandler(&buttonStatus[row][col], &KeyMapingPress[row][col], &KeyMapingHold[row][col]);
     }
   }
 }
 
-void  SumbButtonsMapingHandler(strButtonStatus buttonStatus[3], strKeyMaping KeyMaping[3])
+void  SumbButtonsMapingHandler(strButtonStatus buttonStatus[3], strKeyMapping KeyMapingPress[3], strKeyMapping KeyMapingHold[3])
 {
   for(int i=0 ; i<3 ; i++)
   { 
-    if( KeyMaping[i].LayerMap[currentLayer].Keycode == KEY_LANG1)
+    if( KeyMapingPress[i].LayerMap[currentLayer].Keycode == KEY_LANG1)
     {
       LayerHandlerLeft(buttonStatus[i].button_curr_state, buttonStatus[i].is_updated, buttonStatus[i].isMultiBotPressed);
     }
-    else if( KeyMaping[i].LayerMap[currentLayer].Keycode == KEY_LANG2)
+    else if( KeyMapingPress[i].LayerMap[currentLayer].Keycode == KEY_LANG2)
     {
       LayerHandlerRight(buttonStatus[i].button_curr_state, buttonStatus[i].is_updated, buttonStatus[i].isMultiBotPressed);
     }
     else
     {
-      KeyPressHandler(&buttonStatus[i], &KeyMaping[i]);
+      KeyPressHandler(&buttonStatus[i], &KeyMapingPress[i], &KeyMapingHold[i]);
       // if( (buttonStatus[i].button_curr_state == PRESSED || buttonStatus[i].button_curr_state == HOLD ) && (buttonStatus[i].isMultiBotPressed == false) && buttonStatus[i].is_updated == true)
       // {  
       //   Keyboard.press( KeyMaping[i].LayerMap[currentLayer].Keycode);  
@@ -473,43 +391,43 @@ void  SumbButtonsMapingHandler(strButtonStatus buttonStatus[3], strKeyMaping Key
   }
 }
 
-void KeyPressHandler(strButtonStatus *buttonStatus, strKeyMaping *KeyMaping)
+void KeyPressHandler(strButtonStatus *buttonStatus, strKeyMapping *KeyMapingPress, strKeyMapping *KeyMapingHold)
 {
   if(buttonStatus->is_updated == true && buttonStatus->button_curr_state == PRESSED && buttonStatus->isMultiBotPressed == false )
   {   
-    if(KeyMaping->LayerMap[currentLayer].isShifted == false)
+    if(KeyMapingPress->LayerMap[currentLayer].isShifted == false)
     {
-      Keyboard.press(KeyMaping->LayerMap[currentLayer].Keycode); 
+      Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
     }
     else
     {
       Keyboard.press(KEY_LEFT_SHIFT);
-      Keyboard.press(KeyMaping->LayerMap[currentLayer].Keycode); 
+      Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
     } 
-    HandleKeyCaps(KeyMaping->LayerMap[currentLayer].Keycode); 
+    HandleKeyCaps(KeyMapingPress->LayerMap[currentLayer].Keycode); 
   }
-  else if( (KeyMaping->LayerMap[currentLayer].Keycode != KEY_LEFT_SHIFT)&&(buttonStatus->button_curr_state == HOLD ) && (buttonStatus->isMultiBotPressed == false) && (millis() - buttonStatus->holdKeyPresstickstart) >= KEY_HOLD_UPDATE_PERIOD_MS)
+  else if( (KeyMapingPress->LayerMap[currentLayer].Keycode != KEY_LEFT_SHIFT)&&(buttonStatus->button_curr_state == HOLD ) && (buttonStatus->isMultiBotPressed == false) && (millis() - buttonStatus->holdKeyPresstickstart) >= KEY_HOLD_UPDATE_PERIOD_MS)
   {
-    if(KeyMaping->LayerMap[currentLayer].isShifted == false)
+    if(KeyMapingPress->LayerMap[currentLayer].isShifted == false)
     {
-      Keyboard.press(KeyMaping->LayerMap[currentLayer].Keycode); 
+      Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
     }
     else
     {
       Keyboard.press(KEY_LEFT_SHIFT);
-      Keyboard.press(KeyMaping->LayerMap[currentLayer].Keycode); 
+      Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
     }  
     buttonStatus->holdKeyPresstickstart = millis();
   }
   else if( buttonStatus->button_curr_state == RELEASED && buttonStatus->is_updated == true)
   { 
-    if(KeyMaping->LayerMap[currentLayer].isShifted == false)
+    if(KeyMapingPress->LayerMap[currentLayer].isShifted == false)
     {
-      Keyboard.release(KeyMaping->LayerMap[currentLayer].Keycode);
+      Keyboard.release(KeyMapingPress->LayerMap[currentLayer].Keycode);
     }
     else
     {
-      Keyboard.release(KeyMaping->LayerMap[currentLayer].Keycode);
+      Keyboard.release(KeyMapingPress->LayerMap[currentLayer].Keycode);
       Keyboard.release(KEY_LEFT_SHIFT);
     }
   }
