@@ -25,9 +25,6 @@ LAYER_SHIFT_TOGGLE = 1
 }enLayerShiftMode;
 
 
-
-
-
 int rowPins[KEYBORD_ROWS_COUNT] = {8,9,10}; // Arduino row pins
 int colPins[KEYBORD_COLS_COUNT] = {2,3,4,5,6,7}; // Arduino column pins
 int sumbPins[3] = {15,14,16};
@@ -37,6 +34,7 @@ int sumbPins[3] = {15,14,16};
 int currentLayer = 0;
 int layerShiftMode = LAYER_SHIFT_STICKY;
 bool isCapsPressed = false;
+bool isPressCurActive = false;
 
 typedef enum{
   PRESSED = 0,
@@ -70,12 +68,12 @@ typedef struct{
 
 strButtonStatus keyMatrixButtonsStatus[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT]; 
 strButtonStatus sumbButtonsStatus[3] = {{RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false},
-                                     {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false},
+                                     {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, 200, false, false, false},
                                      {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false}};
 
 strButtonStatus keyMatrixButtonsStatus_R[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT]; 
 strButtonStatus sumbButtonsStatus_R[3] = {{RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false},
-                                     {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false},
+                                     {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, 200, false, false, false},
                                      {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false}};
 
 
@@ -278,8 +276,7 @@ void GetButtonStatus(strButtonStatus *buttonStatus, int buttonPin)
           
         Serial.print(buttonPin );
         Serial.print(" ");
-        Serial.println("PRESS");
-        // Serial.println("PRESSHOLD");
+        Serial.println("PRESS"); 
       }
       else if( buttonStatus->button_curr_read == RELEASED ) 
       {
@@ -318,7 +315,7 @@ void GetRightKeyboardButtonsStatus(void)
 
   if( ((millis() - responceWaitTimer)>=100) )
   {
-    Serial.println("Error data not recevied"); 
+    // Serial.println("Error data not recevied"); 
   }
   else
   {
@@ -345,12 +342,20 @@ void GetRightKeyboardButtonsStatus(void)
     }
     else
     {
-      Serial.println("Data Error");
+      // Serial.println("Data Error");
     }
   }
  
 }
 
+// typedef struct {
+//     String text;
+//     int col;
+//     int row;
+// } strKeyText;
+// strKeyText textKeysLeft[2] = {
+//   {"2wad@Mywork1", },{}
+// };
 
 void KeyboardMatrixMapingHandler(strButtonStatus buttonStatus[][6], strKeyMapping KeyMapingPress[][6], strKeyMapping KeyMapingHold[][6])
 {
@@ -395,46 +400,99 @@ void KeyPressHandler(strButtonStatus *buttonStatus, strKeyMapping *KeyMapingPres
 {
   if(buttonStatus->is_updated == true && buttonStatus->button_curr_state == PRESSED && buttonStatus->isMultiBotPressed == false )
   {   
-    if(KeyMapingPress->LayerMap[currentLayer].isShifted == false)
+    isPressCurActive = true;
+    if( KeyMapingPress->LayerMap[currentLayer].Keycode == KEY_LANG3 )
     {
-      Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
+      Keyboard.print("kkandil");
+      Keyboard.write(KEY_TAB);
+      Keyboard.print("2wad@Mywork1"); 
+    }
+    else if( KeyMapingPress->LayerMap[currentLayer].Keycode == KEY_LANG4 )
+    { 
+      Keyboard.print("2wad@Mywork1"); 
+    }
+    else if( KeyMapingPress->LayerMap[currentLayer].isAMacro == true)
+    {
+      if( KeyMapingPress->LayerMap[currentLayer].MacroKey1 != NULL)
+      {
+        Keyboard.press(KeyMapingPress->LayerMap[currentLayer].MacroKey1); 
+      }
+      if( KeyMapingPress->LayerMap[currentLayer].MacroKey2 != NULL)
+      {
+        Keyboard.press(KeyMapingPress->LayerMap[currentLayer].MacroKey2); 
+      }
+      if( KeyMapingPress->LayerMap[currentLayer].MacroKey3 != NULL)
+      {
+        Keyboard.press(KeyMapingPress->LayerMap[currentLayer].MacroKey3); 
+      }
     }
     else
     {
-      Keyboard.press(KEY_LEFT_SHIFT);
-      Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
-    } 
-    HandleKeyCaps(KeyMapingPress->LayerMap[currentLayer].Keycode); 
+      if(KeyMapingPress->LayerMap[currentLayer].isShifted == false)
+      {
+        Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
+      }
+      else
+      {
+        Keyboard.press(KEY_LEFT_SHIFT);
+        Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
+      } 
+      HandleKeyCaps(KeyMapingPress->LayerMap[currentLayer].Keycode); 
+    }
   }
-  else if( (KeyMapingPress->LayerMap[currentLayer].Keycode != KEY_LEFT_SHIFT)&&(buttonStatus->button_curr_state == HOLD ) && (buttonStatus->isMultiBotPressed == false) && (millis() - buttonStatus->holdKeyPresstickstart) >= KEY_HOLD_UPDATE_PERIOD_MS)
-  {
-    if(KeyMapingPress->LayerMap[currentLayer].isShifted == false)
+  else if( (KeyMapingPress->LayerMap[currentLayer].isAMacro == false) && (KeyMapingPress->LayerMap[currentLayer].Keycode != KEY_LEFT_SHIFT)&&(buttonStatus->button_curr_state == HOLD ) && (buttonStatus->isMultiBotPressed == false) && (millis() - buttonStatus->holdKeyPresstickstart) >= KEY_HOLD_UPDATE_PERIOD_MS)
+  { 
+    if( KeyMapingPress->LayerMap[currentLayer].Keycode != KEY_LANG3  && KeyMapingPress->LayerMap[currentLayer].Keycode != KEY_LANG4)
     {
-      Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
+      if(KeyMapingPress->LayerMap[currentLayer].isShifted == false)
+      {
+        Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
+      }
+      else
+      {
+        Keyboard.press(KEY_LEFT_SHIFT);
+        Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
+      }  
+      buttonStatus->holdKeyPresstickstart = millis();
     }
-    else
-    {
-      Keyboard.press(KEY_LEFT_SHIFT);
-      Keyboard.press(KeyMapingPress->LayerMap[currentLayer].Keycode); 
-    }  
-    buttonStatus->holdKeyPresstickstart = millis();
   }
   else if( buttonStatus->button_curr_state == RELEASED && buttonStatus->is_updated == true)
   { 
-    if(KeyMapingPress->LayerMap[currentLayer].isShifted == false)
+    isPressCurActive = false;
+    if( KeyMapingPress->LayerMap[currentLayer].isAMacro == true )
     {
-      Keyboard.release(KeyMapingPress->LayerMap[currentLayer].Keycode);
+      if( KeyMapingPress->LayerMap[currentLayer].MacroKey1 != NULL)
+      {
+        Keyboard.release(KeyMapingPress->LayerMap[currentLayer].MacroKey1); 
+      }
+      if( KeyMapingPress->LayerMap[currentLayer].MacroKey2 != NULL)
+      {
+        Keyboard.release(KeyMapingPress->LayerMap[currentLayer].MacroKey2); 
+      }
+      if( KeyMapingPress->LayerMap[currentLayer].MacroKey3 != NULL)
+      {
+        Keyboard.release(KeyMapingPress->LayerMap[currentLayer].MacroKey3); 
+      }
     }
-    else
+    else if( KeyMapingPress->LayerMap[currentLayer].Keycode != KEY_LANG3 && KeyMapingPress->LayerMap[currentLayer].Keycode != KEY_LANG4)
     {
-      Keyboard.release(KeyMapingPress->LayerMap[currentLayer].Keycode);
-      Keyboard.release(KEY_LEFT_SHIFT);
+      if(KeyMapingPress->LayerMap[currentLayer].isShifted == false)
+      {
+        Keyboard.release(KeyMapingPress->LayerMap[currentLayer].Keycode);
+      }
+      else
+      {
+        Keyboard.release(KeyMapingPress->LayerMap[currentLayer].Keycode);
+        Keyboard.release(KEY_LEFT_SHIFT);
+      }
     }
   }
 }
 
 void LayerHandlerLeft(int button_curr_state, bool is_updated, bool isMultiBotPressed)
 { 
+  if( isPressCurActive == false)
+  {
   if( button_curr_state == PRESSED && is_updated == true && isMultiBotPressed == false)
   {
     // Serial.println("LayerChange");
@@ -456,11 +514,13 @@ void LayerHandlerLeft(int button_curr_state, bool is_updated, bool isMultiBotPre
     currentLayer = 0; 
     Serial.println("Layer_L RELEASED");
   }
-  
+  }
 }
 
 void LayerHandlerRight(int button_curr_state, bool is_updated, bool isMultiBotPressed)
 { 
+  if( isPressCurActive == false)
+  {
   if( button_curr_state == PRESSED && is_updated == true && isMultiBotPressed == false)
   {
     // Serial.println("LayerChange");
@@ -494,6 +554,7 @@ void LayerHandlerRight(int button_curr_state, bool is_updated, bool isMultiBotPr
     dataOut[2] = '\n';
     Serial1.write(dataOut, 3);
     Serial.println("Layer_R RELEASED");
+  }
   }
 }
 

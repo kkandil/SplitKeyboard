@@ -23,8 +23,8 @@ def generate_header_file(excel_file, output_file):
         f.write("    KeyboardKeycode Keycode;\n")
         f.write("    bool isShifted;\n")
         f.write("    bool isAMacro;\n")
-        f.write("    bool isText;\n")
-        f.write("    String Text;\n")
+        #f.write("    bool isText;\n")
+        #f.write("    String Text;\n")
         f.write("    KeyboardKeycode MacroKey1;\n")
         f.write("    KeyboardKeycode MacroKey2;\n")
         f.write("    KeyboardKeycode MacroKey3;\n")
@@ -50,8 +50,8 @@ def generate_header_file(excel_file, output_file):
                         key = sheet.cell(i,table_start_col).value
                         
                         # Now, let's handle multi-character columns correctly
-                        is_text = sheet.cell(i,table_start_col+1).value
-                        text    = sheet.cell(i,table_start_col+2).value
+                       # is_text = sheet.cell(i,table_start_col+1).value
+                        #text    = sheet.cell(i,table_start_col+2).value
                         is_macro= sheet.cell(i,table_start_col+3).value
                         key1    = sheet.cell(i,table_start_col+4).value
                         key2    = sheet.cell(i,table_start_col+5).value
@@ -59,7 +59,8 @@ def generate_header_file(excel_file, output_file):
                         is_shifted = sheet.cell(i,table_start_col+7).value
 
                         # Format and write each row in the struct format
-                        f.write(f"{{ {key}, {is_shifted}, {is_text}, {is_macro}, \"{text}\", {key1}, {key2}, {key3} }}")
+                        #f.write(f"{{ {key}, {is_shifted}, {is_text}, {is_macro}, \"{text}\", {key1}, {key2}, {key3} }}")
+                        f.write(f"{{ {key}, {is_shifted}, {is_macro}, {key1}, {key2}, {key3} }}")
                         if layer_name!='Layer3':
                             f.write(",")
                     f.write("}}")
@@ -87,8 +88,8 @@ def generate_header_file(excel_file, output_file):
                     key = sheet.cell(i,table_start_col).value
                     
                     # Now, let's handle multi-character columns correctly
-                    is_text = sheet.cell(i,table_start_col+1).value
-                    text    = sheet.cell(i,table_start_col+2).value
+                    #is_text = sheet.cell(i,table_start_col+1).value
+                    #text    = sheet.cell(i,table_start_col+2).value
                     is_macro= sheet.cell(i,table_start_col+3).value
                     key1    = sheet.cell(i,table_start_col+4).value
                     key2    = sheet.cell(i,table_start_col+5).value
@@ -96,7 +97,8 @@ def generate_header_file(excel_file, output_file):
                     is_shifted = sheet.cell(i,table_start_col+7).value
 
                     # Format and write each row in the struct format
-                    f.write(f"{{ {key}, {is_shifted}, {is_text}, {is_macro}, \"{text}\", {key1}, {key2}, {key3} }}")
+                    #f.write(f"{{ {key}, {is_shifted}, {is_text}, {is_macro}, \"{text}\", {key1}, {key2}, {key3} }}")
+                    f.write(f"{{ {key}, {is_shifted}, {is_macro}, {key1}, {key2}, {key3} }}")
                     if layer_name!='Layer3':
                         f.write(",")
                 f.write("}}")
