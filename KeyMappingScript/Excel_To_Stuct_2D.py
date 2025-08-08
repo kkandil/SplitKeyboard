@@ -8,9 +8,9 @@ def generate_header_file(excel_file, output_file):
     layers = ['Layer1', 'Layer2', 'Layer3']
 
     #Tables
-    ArrayNames = ["keyMapingLeftPress", "keyMapingLeftHold", "keyMapingRightPress", "keyMapingRightHold"]
-    Tableindices = [20, 32, 44, 56]
-    ThumbArrayNames = [  "thumbMapingLeftPress","thumbMapingLeftHold","thumbMapingRightPress","thumbMapingRightHold"]
+    ArrayNames = ["keyMapingLeftPress", "keyMapingRightPress"]
+    Tableindices = [20, 44]
+    ThumbArrayNames = [  "thumbMapingLeftPress","thumbMapingRightPress"]
     # Output header file
     with open(output_file, 'w') as f:
         # Write initial part of the header file
@@ -113,7 +113,8 @@ def generate_header_file(excel_file, output_file):
         f.write("#endif // KEYMAP_H\n")
 
 if __name__ == "__main__":
-    excel_file = "KeyMapingGenerator.xlsx"  # Change to your file name
+    excel_file = "KeyMapingGenerator_Normal.xlsx"  # Change to your file name
+    excel_file_gaming = "KeyMapingGenerator_Gaming.xlsx"  # Change to your file name
     output_file = "..\\Firmware\\SplitKeyboard_Left\\KeyMapping.h"  # The name of the output header file
     generate_header_file(excel_file, output_file)
     print("Header file generated successfully.")

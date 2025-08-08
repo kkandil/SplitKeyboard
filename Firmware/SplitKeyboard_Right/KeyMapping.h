@@ -3,7 +3,10 @@
 
 #include "HID-Project.h"
 
-#include "SplitKeyboard_Cfg.h"
+// #include "SplitKeyboard_Cfg.h"
+
+#define KEYBORD_ROWS_COUNT 3
+#define KEYBORD_COLS_COUNT 6
 
 typedef struct {
     KeyboardKeycode Keycode;
@@ -17,8 +20,10 @@ typedef struct {
 typedef struct {
     strKeyCode LayerMap[3];
 } strKeyMapping;
+ 
 
-strKeyMapping keyMapingLeftPress[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
+// #if GAMIN_MODE_ENABLE == false
+strKeyMapping keyMapingLeftPress_Normal[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
     {
        {{{ KEY_ESC, false, false, KEY_A, KEY_A, KEY_A },{ KEY_TAB, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_TAB, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_Q, false, false, KEY_A, KEY_A, KEY_A },{ KEY_1, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F1, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
@@ -33,58 +38,27 @@ strKeyMapping keyMapingLeftPress[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
        {{{ KEY_S, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LANG4, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F7, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_D, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_BRACE, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F8, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_F, false, false, KEY_A, KEY_A, KEY_A },{ KEY_RIGHT_BRACE, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F9, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_G, false, false, KEY_A, KEY_A, KEY_A },{ KEY_OPER, false, true, KEY_LEFT_SHIFT, KEY_HOME, NULL },{ KEY_F10, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
+       {{{ KEY_G, false, false, KEY_A, KEY_A, KEY_A },{ KEY_OPER, false, true, KEY_LEFT_SHIFT, KEY_HOME, KEY_RESERVED },{ KEY_F10, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
     },
     {
        {{{ KEY_LEFT_WINDOWS, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_ALT, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_LEFT_ALT, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_Z, false, false, KEY_A, KEY_A, KEY_A },{ KEY_PAGE_UP, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F11, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_X, false, false, KEY_A, KEY_A, KEY_A },{ KEY_PAGE_DOWN, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_X, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
+       {{{ KEY_X, false, false, KEY_A, KEY_A, KEY_A },{ KEY_PAGE_DOWN, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F12, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_C, false, false, KEY_A, KEY_A, KEY_A },{ KEY_9, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_TILDE, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_V, false, false, KEY_A, KEY_A, KEY_A },{ KEY_0, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_OPER, false, true, KEY_LEFT_ALT, KEY_LEFT_ARROW, KEY_F6 }}},
        {{{ KEY_B, false, false, KEY_A, KEY_A, KEY_A },{ KEY_OPER, false, true, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_LEFT_ARROW },{ KEY_OPER, false, true, KEY_LEFT_ALT, KEY_RIGHT_ARROW, KEY_F6 }}}
     }
 };
-strKeyMapping keyMapingRightPress[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
-    {
-       {{{ KEY_Y, false, false, NULL, NULL, NULL },{ KEY_6, true, false, NULL, NULL, NULL },{ KEY_LANG5, false, false, KEY_LEFT_ALT, KEY_LEFT_ARROW, NULL }}},
-       {{{ KEY_U, false, false, NULL, NULL, NULL },{ KEY_7, true, false, NULL, NULL, NULL },{ KEYPAD_7, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_I, false, false, NULL, NULL, NULL },{ KEY_8, true, false, NULL, NULL, NULL },{ KEYPAD_8, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_O, false, false, NULL, NULL, NULL },{ KEY_9, true, false, NULL, NULL, NULL },{ KEYPAD_9, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_P, false, false, NULL, NULL, NULL },{ KEY_0, true, false, NULL, NULL, NULL },{ KEYPAD_SUBTRACT, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_BACKSPACE, false, false, NULL, NULL, NULL },{ KEY_DELETE, false, false, NULL, NULL, NULL },{ KEY_BACKSPACE, false, false, NULL, NULL, NULL }}}
-    },
-    {
-       {{{ KEY_H, false, false, NULL, NULL, NULL },{ KEY_MINUS, false, false, NULL, NULL, NULL },{ KEY_H, false, false, KEY_LEFT_ALT, KEY_RIGHT_ARROW, NULL }}},
-       {{{ KEY_J, false, false, NULL, NULL, NULL },{ KEY_BACKSLASH, true, false, NULL, NULL, NULL },{ KEYPAD_4, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_K, false, false, NULL, NULL, NULL },{ KEY_UP_ARROW, false, false, NULL, NULL, NULL },{ KEYPAD_5, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_L, false, false, NULL, NULL, NULL },{ KEY_LEFT_BRACE, false, false, NULL, NULL, NULL },{ KEYPAD_6, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_SEMICOLON, false, false, NULL, NULL, NULL },{ KEY_RIGHT_BRACE, false, false, NULL, NULL, NULL },{ KEYPAD_ADD, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_HOME, false, false, NULL, NULL, NULL },{ KEY_PRINTSCREEN, false, false, NULL, NULL, NULL },{ KEY_8, true, false, NULL, NULL, NULL }}}
-    },
-    {
-       {{{ KEY_N, false, false, NULL, NULL, NULL },{ KEY_BACKSLASH, false, false, NULL, NULL, NULL },{ KEY_EQUAL, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_M, false, false, NULL, NULL, NULL },{ KEY_LEFT_ARROW, false, false, NULL, NULL, NULL },{ KEYPAD_1, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_COMMA, false, false, NULL, NULL, NULL },{ KEY_DOWN_ARROW, false, false, NULL, NULL, NULL },{ KEYPAD_2, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_PERIOD, false, false, NULL, NULL, NULL },{ KEY_RIGHT_ARROW, false, false, NULL, NULL, NULL },{ KEYPAD_3, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_QUOTE, false, false, NULL, NULL, NULL },{ KEY_SLASH, false, false, NULL, NULL, NULL },{ KEY_PERIOD, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_END, false, false, NULL, NULL, NULL },{ KEY_END, false, false, NULL, NULL, NULL },{ KEYPAD_DIVIDE, false, false, NULL, NULL, NULL }}}
-    }
-};
-strKeyMapping thumbMapingLeftPress[KEYBORD_ROWS_COUNT] = {
+ 
+
+// #if GAMIN_MODE_ENABLE == false
+strKeyMapping thumbMapingLeftPress_Normal[KEYBORD_ROWS_COUNT] = {
        {{{ KEY_LEFT_CTRL, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_CTRL, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_LEFT_CTRL, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_LANG1, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LANG1, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_LANG1, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_SPACE, false, false, KEY_A, KEY_A, KEY_A },{ KEY_SPACE, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_SPACE, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
     };
-strKeyMapping thumbMapingRightPress[KEYBORD_ROWS_COUNT] = {
-       {{{ KEY_ENTER, false, false, NULL, NULL, NULL },{ KEY_ENTER, false, false, NULL, NULL, NULL },{ KEY_ENTER, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_LANG2, false, false, NULL, NULL, NULL },{ KEY_LANG2, false, false, NULL, NULL, NULL },{ KEY_LANG2, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_BACKSPACE, false, false, NULL, NULL, NULL },{ KEY_BACKSPACE, false, false, NULL, NULL, NULL },{ KEYPAD_0, false, false, NULL, NULL, NULL }}}
-    };
-
-    
-
-
-    strKeyMapping keyMapingLeftPress_Gaming[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
+ 
+strKeyMapping keyMapingLeftPress_Gaming[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
     {
        {{{ KEY_ESC, false, false, KEY_A, KEY_A, KEY_A },{ KEY_ESC, false, false, KEY_A, KEY_A, KEY_A },{ KEY_TAB, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_Q, false, false, KEY_A, KEY_A, KEY_A },{ KEY_1, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F1, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
@@ -99,7 +73,7 @@ strKeyMapping thumbMapingRightPress[KEYBORD_ROWS_COUNT] = {
        {{{ KEY_S, false, false, KEY_A, KEY_A, KEY_A },{ KEY_S, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F7, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_D, false, false, KEY_A, KEY_A, KEY_A },{ KEY_D, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F8, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_F, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F9, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_G, false, false, KEY_A, KEY_A, KEY_A },{ KEY_G, false, false, KEY_LEFT_SHIFT, KEY_HOME, NULL },{ KEY_F10, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
+       {{{ KEY_G, false, false, KEY_A, KEY_A, KEY_A },{ KEY_G, false, false, KEY_LEFT_SHIFT, KEY_HOME, KEY_RESERVED },{ KEY_F10, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
     },
     {
        {{{ KEY_SPACE, false, false, KEY_A, KEY_A, KEY_A },{ KEY_SPACE, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_ALT, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
@@ -115,4 +89,5 @@ strKeyMapping thumbMapingLeftPress_Gaming[KEYBORD_ROWS_COUNT] = {
        {{{ KEY_LEFT_CTRL, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_CTRL, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LANG1, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
        {{{ KEY_LEFT_ALT, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_ALT, false, false, KEY_A, KEY_A, KEY_A },{ KEY_SPACE, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
     };
+// #endif
 #endif // KEYMAP_H

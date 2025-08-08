@@ -1,5 +1,6 @@
 #include "HID-Project.h"
 #include <Encoder.h>
+#include "KeyMapping.h"
 
 #define KEYBORD_ROWS_COUNT 3
 #define KEYBORD_COLS_COUNT 6
@@ -10,12 +11,13 @@
 #define BUTTON_HOLD_DEBUNCE_TIME 500
 
 #define LAYER_SHIFT_TOGGLE_ENABLED LAYER_SHIFT_TOGGLE
+// Arduino Micro => Adafruit itsybitsy m0
+// 5 => A4, 6 => A2, 8 => A3
+// 16 => 11, 14 => 12. 15 => 13
 
-
-
-int rowPins[KEYBORD_ROWS_COUNT] = {8,9,10}; // Arduino row pins
-int colPins[KEYBORD_COLS_COUNT] = {2,3,4,5,6,7}; // Arduino column pins
-int sumbPins[3] = {15,14,16};
+int rowPins[KEYBORD_ROWS_COUNT] = {A3,9,10}; // Arduino row pins
+int colPins[KEYBORD_COLS_COUNT] = {2,3,4,A4,A2,7}; // Arduino column pins
+int sumbPins[3] = {13,12,11};
 #define LED_1_PIN A0
 #define LED_2_PIN A1
 
@@ -89,8 +91,12 @@ void setup() {
 byte dataOut[23];
 byte dataIn[10];
 
+unsigned long responceWaitTimer = 0;
+bool isAckReceived = false;
+bool isGamingModeActive = false;
 void loop() {
- 
+  
+  Serial.println("Data");
   if(Serial1.available())
   {
     // digitalWrite(2, HIGH);
@@ -130,11 +136,174 @@ void loop() {
     }
     else if( dataIn[0] == 0x0D )
     { 
-      digitalWrite(LED_1_PIN, dataIn[1]) ;
+      if(dataIn[1] == 2)
+      {
+        digitalWrite(LED_1_PIN, HIGH) ;
+      }
+      else 
+      {
+        digitalWrite(LED_1_PIN, LOW) ;
+      }
     }
     else if( dataIn[0] == 0x0B )
     { 
       digitalWrite(LED_2_PIN, dataIn[1]) ;
+    }
+    else if( dataIn[0] == 0x0F )
+    { 
+      isGamingModeActive = (bool) dataIn[1];
+      isAckReceived= true;
+      for(int i=0 ; i<KEYBORD_ROWS_COUNT ; i++)
+      { 
+        int index = 1;
+        dataOut[0] = 0x0F;
+        for(int k=0 ; k<3 ; k++)
+        { 
+          if( isGamingModeActive == false)
+          {
+            dataOut[index] = (byte) thumbMapingLeftPress_Normal[i].LayerMap[k].Keycode; 
+            dataOut[index+1] = (byte) thumbMapingLeftPress_Normal[i].LayerMap[k].isShifted;
+            dataOut[index+2] = (byte) thumbMapingLeftPress_Normal[i].LayerMap[k].isAMacro;
+            dataOut[index+3] = (byte) thumbMapingLeftPress_Normal[i].LayerMap[k].MacroKey1;
+            dataOut[index+4] = (byte) thumbMapingLeftPress_Normal[i].LayerMap[k].MacroKey2;
+            dataOut[index+5] = (byte) thumbMapingLeftPress_Normal[i].LayerMap[k].MacroKey3; 
+          }
+          else
+          {
+            dataOut[index] = (byte) thumbMapingLeftPress_Gaming[i].LayerMap[k].Keycode; 
+            dataOut[index+1] = (byte) thumbMapingLeftPress_Gaming[i].LayerMap[k].isShifted;
+            dataOut[index+2] = (byte) thumbMapingLeftPress_Gaming[i].LayerMap[k].isAMacro;
+            dataOut[index+3] = (byte) thumbMapingLeftPress_Gaming[i].LayerMap[k].MacroKey1;
+            dataOut[index+4] = (byte) thumbMapingLeftPress_Gaming[i].LayerMap[k].MacroKey2;
+            dataOut[index+5] = (byte) thumbMapingLeftPress_Gaming[i].LayerMap[k].MacroKey3; 
+          }
+          index = index + 6;
+        }
+        // index = 18
+        dataOut[19] = 0xFF;
+        // Serial1.flush();
+        Serial1.write(dataOut, 20);
+
+        for(int n=0 ; n<19 ; n++)
+        {
+          Serial.print(dataOut[n]);
+          Serial.print("   ");
+        }
+        Serial.println("");
+        // delay(50);
+        if( i <=1 )
+        {
+        responceWaitTimer = millis();
+        while ( Serial1.available()==0 && ((millis() - responceWaitTimer)<=500) ) {}
+
+        if( ((millis() - responceWaitTimer)>=500) )
+        {
+          Serial.println("Error 0x0F Ack not recevied"); 
+        }
+        else
+        {
+          int readLength = Serial1.readBytesUntil('\n',dataIn,3);
+          Serial1.flush();
+          if( dataIn[0] == 0x0F)
+          {
+            isAckReceived = true;
+          }
+          else
+          {
+            isAckReceived = false;
+            Serial.print(i); 
+            Serial.println(" Error 0x0F Ack not recevied 2"); 
+            break;
+          }
+        }
+        }
+      }
+    }
+    else if( dataIn[0] == 0x0E )
+    { 
+      isGamingModeActive = (bool) dataIn[1];
+      isAckReceived= true;
+      for(int i=0 ; i<KEYBORD_ROWS_COUNT ; i++)
+      { 
+        for(int j=0 ; j<KEYBORD_COLS_COUNT ; j++)
+        {
+          int index = 1;
+          dataOut[0] = 0x0E;
+          for(int k=0 ; k<3 ; k++)
+          { 
+            if( isGamingModeActive == false)
+            {
+              dataOut[index] = (byte) keyMapingLeftPress_Normal[i][j].LayerMap[k].Keycode; 
+              dataOut[index+1] = (byte) keyMapingLeftPress_Normal[i][j].LayerMap[k].isShifted;
+              dataOut[index+2] = (byte) keyMapingLeftPress_Normal[i][j].LayerMap[k].isAMacro;
+              dataOut[index+3] = (byte) keyMapingLeftPress_Normal[i][j].LayerMap[k].MacroKey1;
+              dataOut[index+4] = (byte) keyMapingLeftPress_Normal[i][j].LayerMap[k].MacroKey2;
+              dataOut[index+5] = (byte) keyMapingLeftPress_Normal[i][j].LayerMap[k].MacroKey3; 
+            }
+            else
+            {
+              dataOut[index] = (byte) keyMapingLeftPress_Gaming[i][j].LayerMap[k].Keycode; 
+              dataOut[index+1] = (byte) keyMapingLeftPress_Gaming[i][j].LayerMap[k].isShifted;
+              dataOut[index+2] = (byte) keyMapingLeftPress_Gaming[i][j].LayerMap[k].isAMacro;
+              dataOut[index+3] = (byte) keyMapingLeftPress_Gaming[i][j].LayerMap[k].MacroKey1;
+              dataOut[index+4] = (byte) keyMapingLeftPress_Gaming[i][j].LayerMap[k].MacroKey2;
+              dataOut[index+5] = (byte) keyMapingLeftPress_Gaming[i][j].LayerMap[k].MacroKey3; 
+            }
+            index = index + 6;
+          }
+          // index = 18
+          dataOut[19] = 0xFF;
+          // Serial1.flush();
+          Serial1.write(dataOut, 20);
+
+           for(int n=0 ; n<19 ; n++)
+          {
+            Serial.print(dataOut[n]);
+            Serial.print("   ");
+          }
+          Serial.println(""); 
+
+          if( !(i==KEYBORD_ROWS_COUNT-1 && j==KEYBORD_COLS_COUNT-1))
+          {
+          responceWaitTimer = millis();
+          while ( Serial1.available()==0 && ((millis() - responceWaitTimer)<=500) ) {}
+
+          if( ((millis() - responceWaitTimer)>=500) )
+          {
+            Serial.println("Error 0x0E Ack not recevied"); 
+          }
+          else
+          {
+            int readLength = Serial1.readBytesUntil('\n',dataIn,3);
+            Serial1.flush();
+            if( dataIn[0] == 0x0E)
+            {
+              isAckReceived = true;
+            }
+            else
+            {
+              isAckReceived = false;
+              Serial.print(i);
+              Serial.print(",");
+              Serial.print(j);
+              Serial.println(" Error 0x0E Ack not recevied 2"); 
+              break;
+            }
+          }
+          }
+        }
+        if( isAckReceived == false)
+        {
+          break;
+        }
+      } 
+      // if(isAckReceived == true)
+      // {
+      //   dataOut[0] = 0x0E;
+      //   dataOut[1] = 2;
+      //   dataOut[2] = '\n';
+      //   Serial1.write(dataOut, 3);
+      // }
     }
     // digitalWrite(2, LOW); 
   }

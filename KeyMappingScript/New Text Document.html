@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><title>Key Drill</title></head>
+<body>
+  <p id="prompt">Press the key:</p>
+  <p id="key"></p>
+  <script>
+    const keyList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const prompt = document.getElementById('prompt');
+    const keyDisplay = document.getElementById('key');
+
+    function nextKey() {
+      return keyList[Math.floor(Math.random() * keyList.length)];
+    }
+
+    let target = nextKey();
+    keyDisplay.textContent = target;
+
+    document.onkeydown = evt => {
+      const pressed = evt.key.toUpperCase();
+      if (pressed === target) {
+        target = nextKey();
+        keyDisplay.textContent = target;
+      }
+    };
+  </script>
+</body>
+</html>

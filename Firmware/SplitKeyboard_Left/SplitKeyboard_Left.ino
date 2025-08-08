@@ -2,22 +2,7 @@
 #include "KeyMapping.h"
 #include <Encoder.h>
 
-typedef enum{
-BUTTON_R1_C1   =0 ,
-BUTTON_R1_C2   =1 ,
-BUTTON_R1_C3   =2 ,
-BUTTON_R1_C4   =3 ,
-BUTTON_R2_C1   =4 ,
-BUTTON_R2_C2   =5 ,
-BUTTON_R2_C3   =6 ,
-BUTTON_R2_C4   =7 ,
-BUTTON_R3_C1   =8 ,
-BUTTON_R3_C2   =9 ,
-BUTTON_R3_C3   =10,
-BUTTON_SUMB_1  =11,
-BUTTON_SUMB_2  =12,
-BUTTON_PINK    =13
-}enButtons;
+ 
 
 typedef enum{
 LAYER_SHIFT_STICKY = 0,
@@ -25,16 +10,18 @@ LAYER_SHIFT_TOGGLE = 1
 }enLayerShiftMode;
 
 
-int rowPins[KEYBORD_ROWS_COUNT] = {8,9,10}; // Arduino row pins
-int colPins[KEYBORD_COLS_COUNT] = {2,3,4,5,6,7}; // Arduino column pins
-int sumbPins[3] = {15,14,16};
+byte rowPins[KEYBORD_ROWS_COUNT] = {8,9,10}; // Arduino row pins
+byte colPins[KEYBORD_COLS_COUNT] = {2,3,4,5,6,7}; // Arduino column pins
+byte sumbPins[3] = {15,14,16};
 #define LED_1_PIN A0
-#define LED_2_PIN A1
+#define LED_2_PIN A1 
 
-int currentLayer = 0;
-int layerShiftMode = LAYER_SHIFT_STICKY;
+byte currentLayer = 0;
+byte layerShiftMode = LAYER_SHIFT_STICKY;
 bool isCapsPressed = false;
 bool isPressCurActive = false;
+unsigned long responceWaitTimer = 0;
+bool isGamingModeActive = false;
 
 typedef enum{
   PRESSED = 0,
@@ -44,10 +31,10 @@ typedef enum{
 }enButton_Status;
 
 typedef struct{
-  int button_curr_read ;
-  int button_prev_read ;
-  int button_curr_state;
-  int button_prev_state;
+  byte button_curr_read ;
+  byte button_prev_read ;
+  byte button_curr_state;
+  byte button_prev_state;
   unsigned long button_tickstart;
   unsigned long button_holdtickstart;
   unsigned long holdKeyPresstickstart;
@@ -57,15 +44,7 @@ typedef struct{
   bool isDebunceInProgress;
 }strButtonStatus;
  
-//  typedef struct{
-//   KeyboardKeycode Keycode; 
-//   bool isShifted;
-// }strKeyCode;
-
-// typedef struct{
-//   strKeyCode LayerMap[3]; 
-// }strKeyMapping;
-
+ 
 strButtonStatus keyMatrixButtonsStatus[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT]; 
 strButtonStatus sumbButtonsStatus[3] = {{RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false},
                                      {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, 200, false, false, false},
@@ -77,70 +56,6 @@ strButtonStatus sumbButtonsStatus_R[3] = {{RELEASED, RELEASED, RELEASED, RELEASE
                                      {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false}};
 
 
-// strKeyMapping keyMapingLeft[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] =   {  
-//   {
-//         {{{KEY_ESC,false}, {KEY_TAB,false}, {KEY_TILDE,false}}},
-//         {{{KEY_Q,false}, {KEY_1,true}, {KEY_F1,false}}},
-//         {{{KEY_W,false}, {KEY_2,true}, {KEY_F2,false}}},
-//         {{{KEY_E,false}, {KEY_3,true}, {KEY_F3,false}}},
-//         {{{KEY_R,false}, {KEY_4,true}, {KEY_F4,false}}},
-//         {{{KEY_T,false}, {KEY_5,true}, {KEY_F5,false}}},
-//   },
-//   {
-//         {{{KEY_LEFT_SHIFT,false}, {KEY_LEFT_SHIFT,false}, {KEY_CAPS_LOCK,false}}},
-//         {{{KEY_A,false}, {KEY_A,false}, {KEY_F6,false}}},
-//         {{{KEY_S,false}, {KEY_S,false}, {KEY_F7,false}}},
-//         {{{KEY_D,false}, {KEY_D,false}, {KEY_F8,false}}},
-//         {{{KEY_F,false}, {KEY_F,false}, {KEY_F9,false}}},
-//         {{{KEY_G,false}, {KEY_G,false}, {KEY_F10,false}}},
-//   },
-//   {
-//         {{{KEY_LEFT_WINDOWS,false}, {KEY_LEFT_WINDOWS,false}, {KEY_LEFT_ALT,false}}},
-//         {{{KEY_Z,false}, {KEY_Z,false}, {KEY_F11,false}}},
-//         {{{KEY_X,false}, {KEY_X,false}, {KEY_F12,false}}},
-//         {{{KEY_C,false}, {KEY_C,false}, {KEY_C,false}}},
-//         {{{KEY_V,false}, {KEY_V,false}, {KEY_V,false}}},
-//         {{{KEY_B,false}, {KEY_B,false}, {KEY_B,false}}},
-//   }
-// };
-// strKeyMapping keyMapingRight[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] =   {  
-//   {
-//         {{{KEY_Y,false}, {KEY_6,true}, {KEY_6,true}}},
-//         {{{KEY_U,false}, {KEY_7,true}, {KEYPAD_7,false}}},
-//         {{{KEY_I,false}, {KEY_8,true}, {KEYPAD_8,false}}},
-//         {{{KEY_O,false}, {KEY_9,true}, {KEYPAD_9,false}}},
-//         {{{KEY_P,false}, {KEY_0,true}, {KEYPAD_SUBTRACT,false}}},
-//         {{{KEY_BACKSPACE,false}, {KEY_DELETE,false}, {KEY_BACKSPACE,false}}},
-//   },
-//   {
-//         {{{KEY_H,false}, {KEY_H,false}, {KEY_H,false}}},
-//         {{{KEY_J,false}, {KEY_MINUS,false}, {KEYPAD_4,false}}},
-//         {{{KEY_K,false}, {KEY_UP_ARROW,false}, {KEYPAD_5,false}}},
-//         {{{KEY_L,false}, {KEY_LEFT_BRACE,false}, {KEYPAD_6,false}}},
-//         {{{KEY_SEMICOLON,false}, {KEY_RIGHT_BRACE,false}, {KEYPAD_ADD,false}}},
-//         {{{KEY_HOME,false}, {KEY_HOME,false}, {KEYPAD_MULTIPLY,false}}},
-//   },
-//   {
-//         {{{KEY_N,false}, {KEY_N,false}, {KEY_5,true}}},
-//         {{{KEY_M,false}, {KEY_LEFT_ARROW,false}, {KEYPAD_1,false}}},
-//         {{{KEY_COMMA,false}, {KEY_DOWN_ARROW,false}, {KEYPAD_2,false}}},
-//         {{{KEY_PERIOD,false}, {KEY_RIGHT_ARROW,false}, {KEYPAD_3,false}}},
-//         {{{KEY_QUOTE,false}, {KEY_SLASH,false}, {KEY_EQUAL,false}}},
-//         {{{KEY_END,false}, {KEY_END,false}, {KEYPAD_DIVIDE,false}}},
-//   },
-// };
-  
-// strKeyMapping sumbMapingLeft[3] =   {  
-//   {{{KEY_LEFT_CTRL,false}, {KEY_LEFT_CTRL,false}, {KEY_LEFT_CTRL,false}}},
-//   {{{KEY_LANG1,false}, {KEY_LANG1,false}, {KEY_LANG1,false}}},
-//   {{{KEY_SPACE,false}, {KEY_SPACE,false}, {KEY_SPACE,false}}},
-// };
-
-// strKeyMapping sumbMapingRight[3] =   {  
-//   {{{KEY_RETURN,false}, {KEY_RETURN,false}, {KEY_RETURN,false}}},
-//   {{{KEY_LANG2,false}, {KEY_LANG2,false}, {KEY_LANG2,false}}},
-//   {{{KEY_BACKSPACE,false}, {KEY_BACKSPACE,false}, {KEYPAD_0,false}}},
-// };
 
 void setup() {
   // put your setup code here, to run once:
@@ -149,6 +64,7 @@ void setup() {
 
   pinMode(LED_1_PIN, OUTPUT);
   pinMode(LED_2_PIN, OUTPUT); 
+  
   for (int row = 0; row < KEYBORD_ROWS_COUNT; row++) 
   {
     pinMode(rowPins[row], OUTPUT); // Set rows as input with pull-ups
@@ -203,10 +119,10 @@ void setup() {
   Keyboard.begin();
 }
 
-byte datain[50];
-byte dataOut[10];
 
-unsigned long responceWaitTimer = 0;
+
+
+
 
 
 
@@ -219,13 +135,26 @@ void loop() {
   }
   GetRightKeyboardButtonsStatus();
   
-  SumbButtonsMapingHandler(sumbButtonsStatus, thumbMapingLeftPress, thumbMapingLeftPress);
+  // if( isGamingModeActive == true)
+  // {
+  //   SumbButtonsMapingHandler(sumbButtonsStatus, thumbMapingLeftPress_, thumbMapingLeftPress_);
+  // }
+  // else
+  // {
+    SumbButtonsMapingHandler(sumbButtonsStatus, thumbMapingLeftPress, thumbMapingLeftPress);
+  // }
   SumbButtonsMapingHandler(sumbButtonsStatus_R, thumbMapingRightPress, thumbMapingRightPress);
-  KeyboardMatrixMapingHandler(keyMatrixButtonsStatus, keyMapingLeftPress, keyMapingLeftPress);
+  // if( isGamingModeActive == true)
+  // {
+  //   KeyboardMatrixMapingHandler(keyMatrixButtonsStatus, keyMapingLeftPress_, keyMapingLeftPress_);
+  // }
+  // else
+  // {
+    KeyboardMatrixMapingHandler(keyMatrixButtonsStatus, keyMapingLeftPress, keyMapingLeftPress);
+  // }
   KeyboardMatrixMapingHandler(keyMatrixButtonsStatus_R, keyMapingRightPress, keyMapingRightPress);
-
-
-  if( currentLayer == 2)
+ 
+  if( currentLayer == 1 && isGamingModeActive == false)
   {
     digitalWrite(LED_2_PIN, HIGH);
   }
@@ -234,6 +163,14 @@ void loop() {
     digitalWrite(LED_2_PIN, LOW);
   }
 
+  if( isGamingModeActive == true)
+  {
+    digitalWrite(LED_1_PIN, HIGH);
+  }
+  else
+  {
+    digitalWrite(LED_1_PIN, LOW);
+  }
   
 
   delay(5); 
@@ -274,18 +211,18 @@ void GetButtonStatus(strButtonStatus *buttonStatus, int buttonPin)
         buttonStatus->button_holdtickstart = millis();
         buttonStatus->is_updated = true;
           
-        Serial.print(buttonPin );
-        Serial.print(" ");
-        Serial.println("PRESS"); 
+        // Serial.print(buttonPin );
+        // Serial.print(" ");
+        // Serial.println("PRESS"); 
       }
       else if( buttonStatus->button_curr_read == RELEASED ) 
       {
         buttonStatus->button_curr_state = RELEASED;
         buttonStatus->is_updated = true;
         buttonStatus->isMultiBotPressed = false;
-        Serial.print(buttonPin );
-        Serial.print(" ");
-        Serial.println("RELEASED");
+        // Serial.print(buttonPin );
+        // Serial.print(" ");
+        // Serial.println("RELEASED");
       }
       buttonStatus->isDebunceInProgress = false;
   }
@@ -296,9 +233,9 @@ void GetButtonStatus(strButtonStatus *buttonStatus, int buttonPin)
     buttonStatus->button_curr_state = HOLD;
     buttonStatus->is_updated = true;
     buttonStatus->holdKeyPresstickstart = millis() + KEY_HOLD_UPDATE_PERIOD_MS;
-    Serial.print(buttonPin );
-    Serial.print(" ");
-    Serial.println("HOLD");
+    // Serial.print(buttonPin );
+    // Serial.print(" ");
+    // Serial.println("HOLD");
   }
 
   buttonStatus->button_prev_read = buttonStatus->button_curr_read; 
@@ -306,6 +243,9 @@ void GetButtonStatus(strButtonStatus *buttonStatus, int buttonPin)
 
 void GetRightKeyboardButtonsStatus(void)
 { 
+  byte datain[25];
+  byte dataOut[3];
+
   responceWaitTimer = millis();
   dataOut[0] = 0x0C;
   dataOut[1] = '\n';
@@ -319,7 +259,7 @@ void GetRightKeyboardButtonsStatus(void)
   }
   else
   {
-    int readLength = Serial1.readBytesUntil('\n',datain,50);
+    int readLength = Serial1.readBytesUntil('\n',datain,25);
     
     if( datain[21] == 0x0C)
     {
@@ -372,14 +312,14 @@ void  SumbButtonsMapingHandler(strButtonStatus buttonStatus[3], strKeyMapping Ke
 {
   for(int i=0 ; i<3 ; i++)
   { 
-    if( KeyMapingPress[i].LayerMap[currentLayer].Keycode == KEY_LANG1)
+    if( KeyMapingPress[i].LayerMap[currentLayer].Keycode == KEY_LANG1 || KeyMapingPress[i].LayerMap[currentLayer].Keycode == KEY_LANG2)
     {
-      LayerHandlerLeft(buttonStatus[i].button_curr_state, buttonStatus[i].is_updated, buttonStatus[i].isMultiBotPressed);
+      LayerHandlerLeft(buttonStatus[i].button_curr_state, buttonStatus[i].is_updated, buttonStatus[i].isMultiBotPressed, KeyMapingPress[i].LayerMap[currentLayer].Keycode );
     }
-    else if( KeyMapingPress[i].LayerMap[currentLayer].Keycode == KEY_LANG2)
-    {
-      LayerHandlerRight(buttonStatus[i].button_curr_state, buttonStatus[i].is_updated, buttonStatus[i].isMultiBotPressed);
-    }
+    // else if( KeyMapingPress[i].LayerMap[currentLayer].Keycode == KEY_LANG2)
+    // {
+    //   LayerHandlerRight(buttonStatus[i].button_curr_state, buttonStatus[i].is_updated, buttonStatus[i].isMultiBotPressed);
+    // }
     else
     {
       KeyPressHandler(&buttonStatus[i], &KeyMapingPress[i], &KeyMapingHold[i]);
@@ -408,8 +348,27 @@ void KeyPressHandler(strButtonStatus *buttonStatus, strKeyMapping *KeyMapingPres
       Keyboard.print("2wad@Mywork1"); 
     }
     else if( KeyMapingPress->LayerMap[currentLayer].Keycode == KEY_LANG4 )
-    { 
+    {   
       Keyboard.print("2wad@Mywork1"); 
+    }
+    else if( KeyMapingPress->LayerMap[currentLayer].Keycode == KEY_LANG5 )
+    { 
+      if( isGamingModeActive == false)
+      {
+        thumbMapingRightPress[1].LayerMap[0].Keycode = KEY_LANG2;  
+        thumbMapingRightPress[1].LayerMap[1].Keycode = KEY_LANG2; 
+        thumbMapingRightPress[1].LayerMap[2].Keycode = KEY_LANG2; 
+        isGamingModeActive = true; 
+      }
+      else
+      {
+        thumbMapingRightPress[1].LayerMap[0].Keycode = KEY_LANG2;  
+        thumbMapingRightPress[1].LayerMap[1].Keycode = KEY_LANG2; 
+        thumbMapingRightPress[1].LayerMap[2].Keycode = KEY_LANG2; 
+        isGamingModeActive = false;
+      }
+      GetKeyMapingData(isGamingModeActive); 
+      Serial.println("isGamingModeActive"); 
     }
     else if( KeyMapingPress->LayerMap[currentLayer].isAMacro == true)
     {
@@ -489,36 +448,74 @@ void KeyPressHandler(strButtonStatus *buttonStatus, strKeyMapping *KeyMapingPres
   }
 }
 
-void LayerHandlerLeft(int button_curr_state, bool is_updated, bool isMultiBotPressed)
+void LayerHandlerLeft(int button_curr_state, bool is_updated, bool isMultiBotPressed, KeyboardKeycode keycode)
 { 
+  byte dataOut[3];
+
   if( isPressCurActive == false)
   {
   if( button_curr_state == PRESSED && is_updated == true && isMultiBotPressed == false)
   {
     // Serial.println("LayerChange");
-    if( currentLayer == 2)
+    if( keycode == KEY_LANG1 && currentLayer == 1)
       currentLayer = 0;
-    else
+    else if( keycode == KEY_LANG2 && currentLayer == 2)
+      currentLayer = 0;
+    else if( keycode == KEY_LANG1)
+      currentLayer = 1;
+    else if( keycode == KEY_LANG2)
       currentLayer = 2;
     layerShiftMode = LAYER_SHIFT_STICKY ;
-    Serial.println("Layer_L PRESS");
+    dataOut[0] = 0x0D;
+    if (isGamingModeActive == false)
+    {
+      dataOut[1] = (byte) currentLayer;
+    } 
+    else
+    {
+      if (currentLayer != 0) 
+        dataOut[1] = (byte) 2;
+    }
+    dataOut[2] = '\n';
+    Serial1.write(dataOut, 3);
+    // Serial.println("Layer_L PRESS");
   } 
   else if(((is_updated == true && button_curr_state == HOLD))&& isMultiBotPressed == false)
   {
     layerShiftMode = LAYER_SHIFT_TOGGLE ; 
-    currentLayer = 2; 
-    Serial.println("Layer_L HOLD");
+    if( keycode == KEY_LANG1)
+      currentLayer = 1;
+    else if( keycode == KEY_LANG2)
+      currentLayer = 2;
+    dataOut[0] = 0x0D;
+    if (isGamingModeActive == false)
+    {
+      dataOut[1] = (byte) currentLayer;
+    } 
+    else
+    {
+      if (currentLayer != 0) 
+        dataOut[1] = (byte) 2;
+    }
+    dataOut[2] = '\n';
+    Serial1.write(dataOut, 3);
+    // Serial.println("Layer_L HOLD");
   }
   else if(button_curr_state == RELEASED && layerShiftMode == LAYER_SHIFT_TOGGLE && isMultiBotPressed == false && is_updated == true)
   { 
     currentLayer = 0; 
-    Serial.println("Layer_L RELEASED");
+    dataOut[0] = 0x0D;
+    dataOut[1] = (byte) currentLayer;
+    dataOut[2] = '\n';
+    Serial1.write(dataOut, 3);
+    // Serial.println("Layer_L RELEASED");
   }
   }
 }
 
 void LayerHandlerRight(int button_curr_state, bool is_updated, bool isMultiBotPressed)
 { 
+  byte dataOut[3];
   if( isPressCurActive == false)
   {
   if( button_curr_state == PRESSED && is_updated == true && isMultiBotPressed == false)
@@ -529,7 +526,7 @@ void LayerHandlerRight(int button_curr_state, bool is_updated, bool isMultiBotPr
     else
       currentLayer = 1;
     layerShiftMode = LAYER_SHIFT_STICKY ;
-    Serial.println("Layer_R PRESS");
+    // Serial.println("Layer_R PRESS");
 
     dataOut[0] = 0x0D;
     dataOut[1] = (byte) currentLayer;
@@ -540,7 +537,7 @@ void LayerHandlerRight(int button_curr_state, bool is_updated, bool isMultiBotPr
   {
     layerShiftMode = LAYER_SHIFT_TOGGLE ; 
     currentLayer = 1; 
-    Serial.println("Layer_R HOLD");
+    // Serial.println("Layer_R HOLD");
     dataOut[0] = 0x0D;
     dataOut[1] = (byte) currentLayer;
     dataOut[2] = '\n';
@@ -553,13 +550,14 @@ void LayerHandlerRight(int button_curr_state, bool is_updated, bool isMultiBotPr
     dataOut[1] = (byte) currentLayer;
     dataOut[2] = '\n';
     Serial1.write(dataOut, 3);
-    Serial.println("Layer_R RELEASED");
+    // Serial.println("Layer_R RELEASED");
   }
   }
 }
 
 void HandleKeyCaps(KeyboardKeycode Keycode)
 {
+  byte dataOut[3];
   if(Keycode == KEY_CAPS_LOCK && isCapsPressed == false)
   {
     isCapsPressed = true;
@@ -576,4 +574,156 @@ void HandleKeyCaps(KeyboardKeycode Keycode)
     dataOut[2] = '\n'; 
     Serial1.write(dataOut, 3);
   }
+}
+
+void GetKeyMapingData(bool isGamingModeActive)
+{
+  // strKeyMapping keyMaping[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {0};
+  // strKeyMapping thumbMaping[KEYBORD_ROWS_COUNT] = {0};
+  byte datain[25];
+  byte dataOut[3]; 
+  bool isDataReceived = false;
+
+  for(int i=0 ; i<KEYBORD_ROWS_COUNT ; i++)
+  { 
+    for(int j=0 ; j<KEYBORD_COLS_COUNT ; j++)
+    { 
+      responceWaitTimer = millis();
+      dataOut[0] = 0x0E;
+      dataOut[1] = (byte) isGamingModeActive;
+      dataOut[2] = '\n';
+      Serial1.write(dataOut, 3);
+      responceWaitTimer = millis(); 
+      while ( Serial1.available()==0 && ((millis() - responceWaitTimer)<=500) ) {}
+      if( ((millis() - responceWaitTimer)>=500) )
+      {
+        Serial.println("Error KeyMaping data not recevied"); 
+      }
+      else
+      {
+        int readLength = Serial1.readBytesUntil(0xFF,datain,20); 
+        if( datain[0] == 0x0E )
+        { 
+          isDataReceived = true;
+          int index=1;
+          for(int k=0 ; k<3 ; k++)
+          { 
+            keyMapingLeftPress[i][j].LayerMap[k].Keycode = datain[index];
+            keyMapingLeftPress[i][j].LayerMap[k].isShifted = datain[index+1];
+            keyMapingLeftPress[i][j].LayerMap[k].isAMacro = datain[index+2];
+            keyMapingLeftPress[i][j].LayerMap[k].MacroKey1 = datain[index+3];
+            keyMapingLeftPress[i][j].LayerMap[k].MacroKey2 = datain[index+4];
+            keyMapingLeftPress[i][j].LayerMap[k].MacroKey3 = datain[index+5];
+            index = index + 6;
+          }
+          Serial.print(readLength);
+          Serial.print(", ");
+          for(int k=0 ; k<readLength ; k++)
+          {
+            Serial.print(datain[k]);
+            Serial.print("   ");
+          }
+          Serial.println("");
+        }
+        else
+        {
+          isDataReceived = false;
+          Serial.print(datain[0]);
+          Serial.println(" Error KeyMaping data not valid"); 
+          break;
+        }
+      }
+    }
+    if( isDataReceived == false)
+    {
+      break;
+    }
+  }
+  // if( isDataReceived == true)
+  // {
+  //   for(int i=0 ; i<KEYBORD_ROWS_COUNT ; i++)
+  //   { 
+  //     for(int j=0 ; j<KEYBORD_COLS_COUNT ; j++)
+  //     { 
+  //       for(int k=0 ; k<3 ; k++)
+  //       { 
+          
+  //         keyMapingLeftPress[i][j].LayerMap[k].Keycode = keyMaping[i][j].LayerMap[k].Keycode;
+  //         keyMapingLeftPress[i][j].LayerMap[k].isShifted = keyMaping[i][j].LayerMap[k].isShifted;
+  //         keyMapingLeftPress[i][j].LayerMap[k].isAMacro = keyMaping[i][j].LayerMap[k].isAMacro;
+  //         keyMapingLeftPress[i][j].LayerMap[k].MacroKey1 = keyMaping[i][j].LayerMap[k].MacroKey1;
+  //         keyMapingLeftPress[i][j].LayerMap[k].MacroKey2 = keyMaping[i][j].LayerMap[k].MacroKey2;
+  //         keyMapingLeftPress[i][j].LayerMap[k].MacroKey3 = keyMaping[i][j].LayerMap[k].MacroKey3;
+  //       }
+  //     }
+  //   } 
+  //   Serial.println("keyMaping Updated");
+  // }
+  delay(100);
+  isDataReceived = false; 
+  for(int i=0 ; i<KEYBORD_ROWS_COUNT ; i++)
+  { 
+    responceWaitTimer = millis();
+    dataOut[0] = 0x0F;
+    dataOut[1] = (byte) isGamingModeActive;
+    dataOut[2] = '\n';
+    Serial1.write(dataOut, 3);
+    responceWaitTimer = millis(); 
+    while ( Serial1.available()==0 && ((millis() - responceWaitTimer)<=500) ) {}
+    if( ((millis() - responceWaitTimer)>=500) )
+    {
+      Serial.println("Error thumbMaping data not recevied"); 
+    }
+    else
+    {
+      int readLength = Serial1.readBytesUntil(0xFF,datain,20); 
+      if( datain[0] == 0x0F )
+      { 
+        isDataReceived = true;
+        int index=1;
+        for(int k=0 ; k<3 ; k++)
+        { 
+          thumbMapingLeftPress[i].LayerMap[k].Keycode = datain[index];
+          thumbMapingLeftPress[i].LayerMap[k].isShifted = datain[index+1];
+          thumbMapingLeftPress[i].LayerMap[k].isAMacro = datain[index+2];
+          thumbMapingLeftPress[i].LayerMap[k].MacroKey1 = datain[index+3];
+          thumbMapingLeftPress[i].LayerMap[k].MacroKey2 = datain[index+4];
+          thumbMapingLeftPress[i].LayerMap[k].MacroKey3 = datain[index+5];
+          index = index + 6;
+        }
+        Serial.print(readLength);
+        Serial.print(", ");
+        for(int k=0 ; k<readLength ; k++)
+        { 
+          Serial.print(datain[k]);
+          Serial.print("   ");
+        }
+        Serial.println("");
+      }
+      else
+      {
+        isDataReceived = false; 
+        Serial.println("Error thumbMaping data not valid"); 
+        break;
+      }
+    }
+  }
+  // if( isDataReceived == true)
+  // {
+  //   for(int i=0 ; i<KEYBORD_ROWS_COUNT ; i++)
+  //   { 
+  //     for(int k=0 ; k<3 ; k++)
+  //     { 
+        
+  //       thumbMapingLeftPress[i].LayerMap[k].Keycode = thumbMaping[i].LayerMap[k].Keycode;
+  //       thumbMapingLeftPress[i].LayerMap[k].isShifted = thumbMaping[i].LayerMap[k].isShifted;
+  //       thumbMapingLeftPress[i].LayerMap[k].isAMacro = thumbMaping[i].LayerMap[k].isAMacro;
+  //       thumbMapingLeftPress[i].LayerMap[k].MacroKey1 = thumbMaping[i].LayerMap[k].MacroKey1;
+  //       thumbMapingLeftPress[i].LayerMap[k].MacroKey2 = thumbMaping[i].LayerMap[k].MacroKey2;
+  //       thumbMapingLeftPress[i].LayerMap[k].MacroKey3 = thumbMaping[i].LayerMap[k].MacroKey3;
+  //     }
+  //   } 
+  //   Serial.println("thumbMaping Updated");
+  // }
+
 }
