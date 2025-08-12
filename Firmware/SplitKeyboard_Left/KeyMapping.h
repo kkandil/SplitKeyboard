@@ -4,115 +4,187 @@
 #include "HID-Project.h"
 
 #include "SplitKeyboard_Cfg.h"
+typedef enum{
+KeyType_Normal,
+KeyType_Macro,
+KeyType_String,
+KeyType_Consumer
+}enKeyType;
 
 typedef struct {
     KeyboardKeycode Keycode;
     bool isShifted;
-    bool isAMacro;
+    enKeyType keyType;
     KeyboardKeycode MacroKey1;
     KeyboardKeycode MacroKey2;
     KeyboardKeycode MacroKey3;
+    String txt;
 } strKeyCode;
 
 typedef struct {
-    strKeyCode LayerMap[3];
+    strKeyCode LayerMap[KEYBOARD_LAYERS_COUNT];
 } strKeyMapping;
 
 strKeyMapping keyMapingLeftPress[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
     {
-       {{{ KEY_ESC, false, false, KEY_A, KEY_A, KEY_A },{ KEY_TAB, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_TAB, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_Q, false, false, KEY_A, KEY_A, KEY_A },{ KEY_1, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F1, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_W, false, false, KEY_A, KEY_A, KEY_A },{ KEY_2, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F2, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_E, false, false, KEY_A, KEY_A, KEY_A },{ KEY_3, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F3, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_R, false, false, KEY_A, KEY_A, KEY_A },{ KEY_4, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F4, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_T, false, false, KEY_A, KEY_A, KEY_A },{ KEY_5, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F5, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
+      {{{ KEY_VOLUME_MUTE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_VOLUME_MUTE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_VOLUME_MUTE, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_ESC, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_ESC, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_ESC, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_PAGE_UP, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LANG9, false, KeyType_String, KEY_A, KEY_A, KEY_A, "" }, { KEY_PAGE_UP, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_PAGE_DOWN, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_3, false, KeyType_String, KEY_A, KEY_A, KEY_A, "2wad@Mywork1" }, { KEY_PAGE_DOWN, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_CAPS_LOCK, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_CAPS_LOCK, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_CAPS_LOCK, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
     },
     {
-       {{{ KEY_LEFT_SHIFT, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_SHIFT, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_CAPS_LOCK, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_A, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LANG3, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F6, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_S, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LANG4, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F7, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_D, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_BRACE, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F8, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_F, false, false, KEY_A, KEY_A, KEY_A },{ KEY_RIGHT_BRACE, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F9, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_G, false, false, KEY_A, KEY_A, KEY_A },{ KEY_OPER, false, true, KEY_LEFT_SHIFT, KEY_HOME, NULL },{ KEY_F10, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
+      {{{ KEY_TAB, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_TAB, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_TAB, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_Q, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_1, true, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F1, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_W, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_2, true, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F2, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_E, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_3, true, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F3, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_R, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_4, true, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F4, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_T, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_5, true, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F5, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
     },
     {
-       {{{ KEY_LEFT_WINDOWS, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_ALT, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_LEFT_ALT, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_Z, false, false, KEY_A, KEY_A, KEY_A },{ KEY_PAGE_UP, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_F11, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_X, false, false, KEY_A, KEY_A, KEY_A },{ KEY_PAGE_DOWN, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_X, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_C, false, false, KEY_A, KEY_A, KEY_A },{ KEY_9, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_TILDE, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_V, false, false, KEY_A, KEY_A, KEY_A },{ KEY_0, true, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_OPER, false, true, KEY_LEFT_ALT, KEY_LEFT_ARROW, KEY_F6 }}},
-       {{{ KEY_B, false, false, KEY_A, KEY_A, KEY_A },{ KEY_OPER, false, true, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_LEFT_ARROW },{ KEY_OPER, false, true, KEY_LEFT_ALT, KEY_RIGHT_ARROW, KEY_F6 }}}
-    }
+      {{{ KEY_LEFT_SHIFT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_SHIFT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_SHIFT, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_A, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_A, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F6, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_S, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_S, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F7, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_D, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_BRACE, true, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F8, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_F, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RIGHT_BRACE, true, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F9, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_G, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_SHIFT, KEY_HOME, KEY_RESERVED, "" }, { KEY_F10, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+    },
+    {
+      {{{ KEY_LEFT_ALT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_ALT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_ALT, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_Z, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_Z, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F11, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_X, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_X, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F12, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_C, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_9, true, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_TILDE, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_V, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_0, true, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_ALT, KEY_LEFT_ARROW, KEY_F6, "" }}},
+      {{{ KEY_B, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_LEFT_ARROW, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_ALT, KEY_RIGHT_ARROW, KEY_F6, "" }}},
+    },
 };
 strKeyMapping keyMapingRightPress[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
     {
-       {{{ KEY_Y, false, false, NULL, NULL, NULL },{ KEY_6, true, false, NULL, NULL, NULL },{ KEY_LANG5, false, false, KEY_LEFT_ALT, KEY_LEFT_ARROW, NULL }}},
-       {{{ KEY_U, false, false, NULL, NULL, NULL },{ KEY_7, true, false, NULL, NULL, NULL },{ KEYPAD_7, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_I, false, false, NULL, NULL, NULL },{ KEY_8, true, false, NULL, NULL, NULL },{ KEYPAD_8, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_O, false, false, NULL, NULL, NULL },{ KEY_9, true, false, NULL, NULL, NULL },{ KEYPAD_9, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_P, false, false, NULL, NULL, NULL },{ KEY_0, true, false, NULL, NULL, NULL },{ KEYPAD_SUBTRACT, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_BACKSPACE, false, false, NULL, NULL, NULL },{ KEY_DELETE, false, false, NULL, NULL, NULL },{ KEY_BACKSPACE, false, false, NULL, NULL, NULL }}}
+      {{{ KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_PRINTSCREEN, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_PRINTSCREEN, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LANG5, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_DELETE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_DELETE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_DELETE, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_INSERT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LANG8, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_INSERT, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ Key_CALC, false, KeyType_Consumer, KEY_A, KEY_A, KEY_A, "" }, { Key_CALC, false, KeyType_Consumer, KEY_A, KEY_A, KEY_A, "" }, { Key_CALC, false, KeyType_Consumer, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
     },
     {
-       {{{ KEY_H, false, false, NULL, NULL, NULL },{ KEY_MINUS, false, false, NULL, NULL, NULL },{ KEY_H, false, false, KEY_LEFT_ALT, KEY_RIGHT_ARROW, NULL }}},
-       {{{ KEY_J, false, false, NULL, NULL, NULL },{ KEY_BACKSLASH, true, false, NULL, NULL, NULL },{ KEYPAD_4, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_K, false, false, NULL, NULL, NULL },{ KEY_UP_ARROW, false, false, NULL, NULL, NULL },{ KEYPAD_5, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_L, false, false, NULL, NULL, NULL },{ KEY_LEFT_BRACE, false, false, NULL, NULL, NULL },{ KEYPAD_6, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_SEMICOLON, false, false, NULL, NULL, NULL },{ KEY_RIGHT_BRACE, false, false, NULL, NULL, NULL },{ KEYPAD_ADD, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_HOME, false, false, NULL, NULL, NULL },{ KEY_PRINTSCREEN, false, false, NULL, NULL, NULL },{ KEY_8, true, false, NULL, NULL, NULL }}}
+      {{{ KEY_Y, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_6, true, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_Y, false, KeyType_Normal, KEY_LEFT_ALT, KEY_LEFT_ARROW, KEY_RESERVED, "" }}},
+      {{{ KEY_U, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_7, true, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_7, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_I, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_8, true, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_8, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_O, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_EQUAL, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_9, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_P, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_MINUS, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_SUBTRACT, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_BACKSPACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_BACKSPACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_BACKSPACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
     },
     {
-       {{{ KEY_N, false, false, NULL, NULL, NULL },{ KEY_BACKSLASH, false, false, NULL, NULL, NULL },{ KEY_EQUAL, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_M, false, false, NULL, NULL, NULL },{ KEY_LEFT_ARROW, false, false, NULL, NULL, NULL },{ KEYPAD_1, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_COMMA, false, false, NULL, NULL, NULL },{ KEY_DOWN_ARROW, false, false, NULL, NULL, NULL },{ KEYPAD_2, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_PERIOD, false, false, NULL, NULL, NULL },{ KEY_RIGHT_ARROW, false, false, NULL, NULL, NULL },{ KEYPAD_3, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_QUOTE, false, false, NULL, NULL, NULL },{ KEY_SLASH, false, false, NULL, NULL, NULL },{ KEY_PERIOD, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_END, false, false, NULL, NULL, NULL },{ KEY_END, false, false, NULL, NULL, NULL },{ KEYPAD_DIVIDE, false, false, NULL, NULL, NULL }}}
-    }
+      {{{ KEY_H, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_BACKSLASH, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_BACKSLASH, false, KeyType_Normal, KEY_LEFT_ALT, KEY_RIGHT_ARROW, KEY_RESERVED, "" }}},
+      {{{ KEY_J, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_BACKSLASH, true, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_4, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_K, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_UP_ARROW, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_5, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_L, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_LEFT_BRACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_6, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_SEMICOLON, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_RIGHT_BRACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_ADD, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_QUOTE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_SLASH, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_SLASH, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+    },
+    {
+      {{{ KEY_N, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_N, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_EQUAL, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_M, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_LEFT_ARROW, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_1, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_COMMA, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_DOWN_ARROW, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_2, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_PERIOD, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_RIGHT_ARROW, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_3, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_HOME, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_HOME, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_8, true, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_END, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_END, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_END, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+    },
 };
 strKeyMapping thumbMapingLeftPress[KEYBORD_ROWS_COUNT] = {
-       {{{ KEY_LEFT_CTRL, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_CTRL, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_LEFT_CTRL, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_LANG1, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LANG1, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_LANG1, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_SPACE, false, false, KEY_A, KEY_A, KEY_A },{ KEY_SPACE, false, false, KEY_LANG3, KEY_LANG3, KEY_LANG3 },{ KEY_SPACE, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
-    };
+       {{{ KEY_LEFT_WINDOWS, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_WINDOWS, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_WINDOWS, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+       {{{ KEY_LEFT_CTRL, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_CTRL, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_CTRL, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+       {{{ KEY_LANG1, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LANG1, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LANG1, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+       {{{ KEY_SPACE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_SPACE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_SPACE, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+};
 strKeyMapping thumbMapingRightPress[KEYBORD_ROWS_COUNT] = {
-       {{{ KEY_ENTER, false, false, NULL, NULL, NULL },{ KEY_ENTER, false, false, NULL, NULL, NULL },{ KEY_ENTER, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_LANG2, false, false, NULL, NULL, NULL },{ KEY_LANG2, false, false, NULL, NULL, NULL },{ KEY_LANG2, false, false, NULL, NULL, NULL }}},
-       {{{ KEY_BACKSPACE, false, false, NULL, NULL, NULL },{ KEY_BACKSPACE, false, false, NULL, NULL, NULL },{ KEYPAD_0, false, false, NULL, NULL, NULL }}}
-    };
+       {{{ KEY_ENTER, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_ENTER, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_ENTER, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+       {{{ KEY_LANG2, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_LANG2, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_LANG2, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+       {{{ KEY_BACKSPACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_BACKSPACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_0, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+       {{{ KEY_LEFT_SHIFT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_SHIFT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_PERIOD, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+};
 
-    
-
-
-    strKeyMapping keyMapingLeftPress_Gaming[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
+strKeyMapping keyMapingLeftPress_Gaming[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
     {
-       {{{ KEY_ESC, false, false, KEY_A, KEY_A, KEY_A },{ KEY_ESC, false, false, KEY_A, KEY_A, KEY_A },{ KEY_TAB, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_Q, false, false, KEY_A, KEY_A, KEY_A },{ KEY_1, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F1, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_W, false, false, KEY_A, KEY_A, KEY_A },{ KEY_2, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F2, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_E, false, false, KEY_A, KEY_A, KEY_A },{ KEY_3, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F3, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_R, false, false, KEY_A, KEY_A, KEY_A },{ KEY_4, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F4, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_T, false, false, KEY_A, KEY_A, KEY_A },{ KEY_5, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F5, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
+      {{{ KEY_MUTE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_MUTE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_MUTE, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_6, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_6, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_6, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_7, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_7, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_7, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_8, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_8, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_8, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_9, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_9, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_9, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
     },
     {
-       {{{ KEY_LEFT_SHIFT, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_SHIFT, false, false, KEY_A, KEY_A, KEY_A },{ KEY_CAPS_LOCK, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_A, false, false, KEY_A, KEY_A, KEY_A },{ KEY_A, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F6, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_S, false, false, KEY_A, KEY_A, KEY_A },{ KEY_S, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F7, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_D, false, false, KEY_A, KEY_A, KEY_A },{ KEY_D, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F8, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_F, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F9, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_G, false, false, KEY_A, KEY_A, KEY_A },{ KEY_G, false, false, KEY_LEFT_SHIFT, KEY_HOME, NULL },{ KEY_F10, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
+      {{{ KEY_ESC, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_ESC, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_ESC, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_Q, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_1, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F1, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_W, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_2, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F2, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_E, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_3, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F3, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_R, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_4, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F4, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_T, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_5, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F5, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
     },
     {
-       {{{ KEY_SPACE, false, false, KEY_A, KEY_A, KEY_A },{ KEY_SPACE, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_ALT, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_Z, false, false, KEY_A, KEY_A, KEY_A },{ KEY_Z, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F11, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_X, false, false, KEY_A, KEY_A, KEY_A },{ KEY_X, false, false, KEY_A, KEY_A, KEY_A },{ KEY_F12, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_C, false, false, KEY_A, KEY_A, KEY_A },{ KEY_C, false, false, KEY_A, KEY_A, KEY_A },{ KEY_TILDE, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_V, false, false, KEY_A, KEY_A, KEY_A },{ KEY_V, false, false, KEY_A, KEY_A, KEY_A },{ KEY_V, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_B, false, false, KEY_A, KEY_A, KEY_A },{ KEY_B, false, false, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_LEFT_ARROW },{ KEY_B, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
-    }
+      {{{ KEY_LEFT_SHIFT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_SHIFT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_SHIFT, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_A, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_A, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F6, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_S, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_S, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F7, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_D, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_D, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F8, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_F, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F9, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_G, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_G, false, KeyType_Normal, KEY_LEFT_SHIFT, KEY_HOME, KEY_RESERVED, "" }, { KEY_F10, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+    },
+    {
+      {{{ KEY_SPACE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_SPACE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_ALT, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_Z, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_Z, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F11, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_X, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_X, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_F12, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_C, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_C, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_TILDE, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_V, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_V, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_V, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_B, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_B, false, KeyType_Normal, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_LEFT_ARROW, "" }, { KEY_B, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+    },
+};
+strKeyMapping keyMapingRightPress_Gaming[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT] = {
+    {
+      {{{ KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_LANG5, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LANG5, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, {  KEY_LANG5, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_I, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_I, ""  }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_I, ""  }}},
+      {{{ KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_K, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_K, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_K, "" }}},
+      {{{ Key_CALC, false, KeyType_Consumer, KEY_A, KEY_A, KEY_A, "" }, { Key_CALC, false, KeyType_Consumer, KEY_A, KEY_A, KEY_A, "" }, { Key_CALC, false, KeyType_Consumer, KEY_F6, KEY_F6, KEY_F6, "" }}},
+      {{{ KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_RESERVED, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+    },
+    {
+      {{{ KEY_Y, false, KeyType_Normal, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_Y, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_Y, ""}, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_Y, "" }}},
+      {{{ KEY_U, false, KeyType_Normal, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_U, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_U, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_U, "" }}},
+      {{{ KEY_I, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_8, true, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_8, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_O, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_EQUAL, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_9, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_P, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_MINUS, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_SUBTRACT, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_BACKSPACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_BACKSPACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_BACKSPACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+    },
+    {
+      {{{ KEY_H, false, KeyType_Normal, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_H, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_H, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_H, "" }}},
+      {{{ KEY_J, false, KeyType_Normal, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_J, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_J, "" }, { KEY_OPER, false, KeyType_Macro, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, KEY_J, "" }}},
+      {{{ KEY_K, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_UP_ARROW, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_5, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_L, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_LEFT_BRACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_6, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_SEMICOLON, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_RIGHT_BRACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_ADD, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_QUOTE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_SLASH, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_SLASH, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+    },
+    {
+      {{{ KEY_N, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_N, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_EQUAL, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_M, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_LEFT_ARROW, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_1, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_COMMA, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_DOWN_ARROW, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_2, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_PERIOD, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_RIGHT_ARROW, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_3, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_HOME, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_HOME, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_8, true, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+      {{{ KEY_END, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_END, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_END, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+    },
 };
 strKeyMapping thumbMapingLeftPress_Gaming[KEYBORD_ROWS_COUNT] = {
-       {{{ KEY_LANG1, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LANG1, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_CTRL, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_LEFT_CTRL, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_CTRL, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LANG1, false, false, KEY_F6, KEY_F6, KEY_F6 }}},
-       {{{ KEY_LEFT_ALT, false, false, KEY_A, KEY_A, KEY_A },{ KEY_LEFT_ALT, false, false, KEY_A, KEY_A, KEY_A },{ KEY_SPACE, false, false, KEY_F6, KEY_F6, KEY_F6 }}}
-    };
-#endif // KEYMAP_H
+       {{{ KEY_DELETE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_DELETE, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_DELETE, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+       {{{ KEY_LANG1, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LANG1, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_CTRL, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+       {{{ KEY_LEFT_CTRL, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_CTRL, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LANG1, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+       {{{ KEY_LEFT_ALT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_ALT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_SPACE, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+};
+strKeyMapping thumbMapingRightPress_Gaming[KEYBORD_ROWS_COUNT] = {
+       {{{ KEY_ENTER, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_ENTER, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_ENTER, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+       {{{ KEY_LANG2, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_LANG2, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_LANG2, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+       {{{ KEY_BACKSPACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEY_BACKSPACE, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }, { KEYPAD_0, false, KeyType_Normal, KEY_RESERVED, KEY_RESERVED, KEY_RESERVED, "" }}},
+       {{{ KEY_LEFT_SHIFT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_LEFT_SHIFT, false, KeyType_Normal, KEY_A, KEY_A, KEY_A, "" }, { KEY_PERIOD, false, KeyType_Normal, KEY_F6, KEY_F6, KEY_F6, "" }}},
+};
+
+#endif

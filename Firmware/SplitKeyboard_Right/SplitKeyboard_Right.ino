@@ -2,7 +2,7 @@
 #include <Encoder.h>
 #include "KeyMapping.h"
 
-#define KEYBORD_ROWS_COUNT 3
+#define KEYBORD_ROWS_COUNT 4
 #define KEYBORD_COLS_COUNT 6
 
 #define BUTTONS_DEBUNCE_TIME 30
@@ -15,9 +15,9 @@
 // 5 => A4, 6 => A2, 8 => A3
 // 16 => 11, 14 => 12. 15 => 13
 
-int rowPins[KEYBORD_ROWS_COUNT] = {A3,9,10}; // Arduino row pins
+int rowPins[KEYBORD_ROWS_COUNT] = {SDA,A3,9,10}; // Arduino row pins
 int colPins[KEYBORD_COLS_COUNT] = {2,3,4,A4,A2,7}; // Arduino column pins
-int sumbPins[3] = {13,12,11};
+int sumbPins[4] = {13,12,11,A5};
 #define LED_1_PIN A0
 #define LED_2_PIN A1
 
@@ -43,7 +43,8 @@ typedef struct{
 }strButtonStatus; 
 
 strButtonStatus keyMatrixButtonsStatus[KEYBORD_ROWS_COUNT][KEYBORD_COLS_COUNT]; 
-strButtonStatus sumbButtonsStatus[3] = {{RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false},
+strButtonStatus sumbButtonsStatus[4] = {{RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false},
+                                      {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false},
                                      {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, 200, false, false, false},
                                      {RELEASED, RELEASED, RELEASED, RELEASED, 0, 0, 0, BUTTON_HOLD_DEBUNCE_TIME, false, false, false}};
 
@@ -64,7 +65,7 @@ void setup() {
   {
       pinMode(colPins[col], INPUT_PULLUP); 
   }
-  for( int sumIndex=0;sumIndex<3;sumIndex++)
+  for( int sumIndex=0;sumIndex<4;sumIndex++)
   {
      pinMode(sumbPins[sumIndex], INPUT_PULLUP); 
   }
@@ -88,15 +89,15 @@ void setup() {
   }
 }
 
-byte dataOut[23];
+byte dataOut[30];
 byte dataIn[10];
 
 unsigned long responceWaitTimer = 0;
 bool isAckReceived = false;
 bool isGamingModeActive = false;
 void loop() {
-  
-  Serial.println("Data");
+ 
+  // Serial.println("Data");
   if(Serial1.available())
   {
     // digitalWrite(2, HIGH);
@@ -106,10 +107,10 @@ void loop() {
     if( dataIn[0] == 0x0C )
     { 
       ReadKeyboardMatrix();  
-      for(int buttonIndex=0 ; buttonIndex<3 ; buttonIndex++)
+      for(int buttonIndex=0 ; buttonIndex<4 ; buttonIndex++)
       {
         GetButtonStatus(&sumbButtonsStatus[buttonIndex], sumbPins[buttonIndex]);
-      }
+      } 
       int index = 0;
       for (int row = 0; row < KEYBORD_ROWS_COUNT; row++) 
       {
@@ -122,7 +123,7 @@ void loop() {
           // Serial.print(" , ");
         }
       }
-      for(int buttonIndex=0 ; buttonIndex<3 ; buttonIndex++)
+      for(int buttonIndex=0 ; buttonIndex<4 ; buttonIndex++)
       {
         dataOut[index] = sumbButtonsStatus[buttonIndex].button_curr_state;
         dataOut[index] |= sumbButtonsStatus[buttonIndex].is_updated << 4 ;
@@ -130,9 +131,9 @@ void loop() {
         // Serial.print(dataOut[index]);
         // Serial.print(" , ");
       } 
-      dataOut[21] =  0x0C;
-      dataOut[22] = '\n';
-      Serial1.write(dataOut, 23);
+      dataOut[28] =  0x0C;
+      dataOut[29] = '\n';
+      Serial1.write(dataOut, 30);
     }
     else if( dataIn[0] == 0x0D )
     { 
@@ -149,6 +150,7 @@ void loop() {
     { 
       digitalWrite(LED_2_PIN, dataIn[1]) ;
     }
+    /*
     else if( dataIn[0] == 0x0F )
     { 
       isGamingModeActive = (bool) dataIn[1];
@@ -305,8 +307,11 @@ void loop() {
       //   Serial1.write(dataOut, 3);
       // }
     }
+    */
     // digitalWrite(2, LOW); 
   }
+
+  
 }
 
 void ReadKeyboardMatrix(void)
